@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.fola.habit_tracker.screens.ui_screens.LoginScreen
+import com.fola.habit_tracker.ui.auth.LoginScreen
 import com.fola.habit_tracker.ui.theme.HabittrackerTheme
 
 class MainActivity : ComponentActivity() {

@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.fola.habit_tracker" />
+                  <option name="mobileSdkAppId" value="1:777595537496:android:902288dcf58bd791b6622d" />
+                  <option name="projectId" value="habit-tracker-7-3-2025" />
+                  <option name="projectNumber" value="777595537496" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

@@ -1,4 +1,4 @@
-package com.fola.habit_tracker.screens.ui_screens
+package com.fola.habit_tracker.ui.auth
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -18,10 +18,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.FloatState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,13 +30,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fola.habit_tracker.R
+import com.fola.habit_tracker.ui.auth.viewmodel.LoginViewmodel
+import com.fola.habit_tracker.ui.components.InputField
+import com.fola.habit_tracker.ui.components.PasswordInputField
+import com.fola.habit_tracker.ui.components.StyledButton
+import com.fola.habit_tracker.ui.components.UiState
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
+fun LoginScreen(
+    modifier: Modifier = Modifier,
+    loginViewmodel: LoginViewmodel = viewModel()
+) {
+    val loginState = loginViewmodel.uiState.collectAsState()
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -56,18 +62,20 @@ fun LoginScreen(modifier: Modifier = Modifier) {
         )
 
         InputField(
-            value = email,
-            onValueChange = { email = it },
+            value = loginState.value.email.value,
+            onValueChange = { email -> loginViewmodel.updateEmailField(email) },
             placeholder = "Email",
-            uiState = UiState.IDLE,
+            errorMessage = loginState.value.email.errorMessage,
+            uiState = loginState.value.email.state,
             keyboardType = KeyboardType.Email
         )
 
         PasswordInputField(
-            value = password,
-            onValueChange = { password = it },
+            value = loginState.value.password.value,
+            onValueChange = { loginViewmodel.updatePassword(it) },
             placeholder = "Password",
-            uiState = UiState.IDLE
+            errorMessage = loginState.value.password.errorMessage,
+            uiState = loginState.value.password.state
         )
 
         StyledButton(
@@ -90,14 +98,14 @@ fun LoginScreen(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(64.dp))
 
         Text(
-            "Don't Have an Account?",
+            "Don't have an account?",
             color = Color.White,
             modifier = Modifier.padding(12.dp)
         )
 
         StyledButton(
             onClick = { /* TODO: Handle create account */ },
-            text = "Create Account"
+            text = "Create account"
         )
     }
 }
