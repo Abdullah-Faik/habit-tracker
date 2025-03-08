@@ -18,7 +18,7 @@ class LoginViewmodel : ViewModel() {
         _loginScreenState.update { loginState ->
             loginState.copy(
                 email = loginState.email.copy(
-                    value = text
+                    text = text
                 )
             )
         }
@@ -30,13 +30,13 @@ class LoginViewmodel : ViewModel() {
         errorMessage: String = "Email is not valid"
     ): Boolean {
         var isValid = false
-        if (_loginScreenState.value.email.value.isEmpty()) {
+        if (_loginScreenState.value.email.text.isEmpty()) {
             _loginScreenState.update { loginState ->
                 loginState.copy(
                     email = FieldHandler()
                 )
             }
-        } else if (Patterns.EMAIL_ADDRESS.matcher(_loginScreenState.value.email.value).matches()) {
+        } else if (Patterns.EMAIL_ADDRESS.matcher(_loginScreenState.value.email.text).matches()) {
             isValid = true
             _loginScreenState.update { loginState ->
                 loginState.copy(
@@ -65,7 +65,7 @@ class LoginViewmodel : ViewModel() {
         _loginScreenState.update { loginState ->
             loginState.copy(
                 password = loginState.password.copy(
-                    value = text
+                    text = text
                 )
             )
         }
@@ -76,13 +76,13 @@ class LoginViewmodel : ViewModel() {
         errorMessage: String = "Password is short"
     ): Boolean {
         var isValid = false
-        if (_loginScreenState.value.password.value.isEmpty()) {
+        if (_loginScreenState.value.password.text.isEmpty()) {
             _loginScreenState.update { loginState ->
                 loginState.copy(
                     password = FieldHandler()
                 )
             }
-        } else if (_loginScreenState.value.password.value.length >= 8) {
+        } else if (_loginScreenState.value.password.text.length >= 8) {
             isValid = true
             _loginScreenState.update { loginState ->
                 loginState.copy(

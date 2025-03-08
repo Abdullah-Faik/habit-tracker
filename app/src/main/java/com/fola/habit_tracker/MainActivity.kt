@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.fola.habit_tracker.ui.auth.LoginScreen
+import com.fola.habit_tracker.ui.auth.RegisterScreen
 import com.fola.habit_tracker.ui.theme.HabittrackerTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,7 +22,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             HabittrackerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LoginScreen(modifier = Modifier.padding(innerPadding))
+                    RegisterScreen(modifier = Modifier.padding(innerPadding))
                 }
             }
         }

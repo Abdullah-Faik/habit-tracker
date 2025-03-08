@@ -16,6 +16,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,7 +26,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fola.habit_tracker.R
+import com.fola.habit_tracker.ui.auth.viewmodel.RegisterViewmodel
 import com.fola.habit_tracker.ui.components.InputField
 import com.fola.habit_tracker.ui.components.PasswordInputField
 import com.fola.habit_tracker.ui.components.StyledButton
@@ -34,7 +37,14 @@ import com.fola.habit_tracker.ui.components.UiState
 
 @SuppressLint("ResourceType")
 @Composable
-fun RegisterScreen(modifier: Modifier = Modifier) {
+fun RegisterScreen(
+    modifier: Modifier = Modifier,
+    registerViewmodel: RegisterViewmodel = viewModel()
+) {
+    val emailState = registerViewmodel.emailState.collectAsState()
+    val nameState = registerViewmodel.nameState.collectAsState()
+    val password = registerViewmodel.password.collectAsState()
+    val rePassword = registerViewmodel.rePassword.collectAsState()
 
 
     Scaffold(
@@ -72,28 +82,32 @@ fun RegisterScreen(modifier: Modifier = Modifier) {
             )
 
             InputField(
-                value = "",
-                onValueChange = {},
+                value = nameState.value.text,
+                onValueChange = { value -> registerViewmodel.updateName(value) },
                 placeholder = "Name",
-                uiState = UiState.IDLE
+                errorMessage = nameState.value.errorMessage,
+                uiState = nameState.value.state
             )
             InputField(
-                value = "",
-                onValueChange = {},
+                value = emailState.value.text,
+                onValueChange = { value -> registerViewmodel.updateEmail(value) },
                 placeholder = "Email",
-                uiState = UiState.IDLE
+                errorMessage = emailState.value.errorMessage,
+                uiState = emailState.value.state
             )
             PasswordInputField(
-                value = "",
-                onValueChange = {},
+                value = password.value.text,
+                onValueChange = { value -> registerViewmodel.updatePassword(value) },
                 placeholder = "Password",
-                uiState = UiState.IDLE,
+                errorMessage = password.value.errorMessage,
+                uiState = password.value.state,
             )
             PasswordInputField(
-                value = "",
-                onValueChange = {},
+                value = rePassword.value.text,
+                onValueChange = { value -> registerViewmodel.updateRePassword(value) },
                 placeholder = "Confirm Password",
-                uiState = UiState.IDLE
+                errorMessage = rePassword.value.errorMessage,
+                uiState = rePassword.value.state
             )
 
             StyledButton(

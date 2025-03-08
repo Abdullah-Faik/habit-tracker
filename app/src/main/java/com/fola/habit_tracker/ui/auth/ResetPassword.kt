@@ -15,6 +15,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,19 +25,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fola.habit_tracker.R
+import com.fola.habit_tracker.ui.auth.viewmodel.ResetPasswordViewmodel
 import com.fola.habit_tracker.ui.components.InputField
 import com.fola.habit_tracker.ui.components.StyledButton
-import com.fola.habit_tracker.ui.components.UiState
 
 @Composable
-fun ResetPasswordScreen(modifier: Modifier = Modifier) {
+fun ResetPasswordScreen(
+    modifier: Modifier = Modifier,
+    resetViewmodel: ResetPasswordViewmodel = viewModel()
+) {
 
-
+    val uiState = resetViewmodel.emailState.collectAsState()
     Scaffold(
         topBar = {
             Box(
-                modifier = Modifier.padding(top = 32.dp, start = 16.dp)
+                modifier = Modifier
+                    .padding(top = 32.dp, start = 16.dp)
                     .clickable(onClick = {})
             ) {
                 Image(
@@ -64,11 +70,12 @@ fun ResetPasswordScreen(modifier: Modifier = Modifier) {
                 modifier = Modifier.padding(bottom = 48.dp)
             )
             InputField(
-                value = "",
-                onValueChange = {},
-                uiState = UiState.IDLE,
-
-                )
+                value = uiState.value.text,
+                onValueChange = { value -> resetViewmodel.updateEmail(value) },
+                uiState = uiState.value.state,
+                errorMessage = uiState.value.errorMessage,
+                placeholder = "Email"
+            )
             StyledButton(
                 onClick = {},
                 text = "Reset"

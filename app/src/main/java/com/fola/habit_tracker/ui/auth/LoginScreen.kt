@@ -18,7 +18,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.FloatState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,14 +29,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fola.habit_tracker.R
 import com.fola.habit_tracker.ui.auth.viewmodel.LoginViewmodel
 import com.fola.habit_tracker.ui.components.InputField
 import com.fola.habit_tracker.ui.components.PasswordInputField
 import com.fola.habit_tracker.ui.components.StyledButton
-import com.fola.habit_tracker.ui.components.UiState
 
 @Composable
 fun LoginScreen(
@@ -62,7 +59,7 @@ fun LoginScreen(
         )
 
         InputField(
-            value = loginState.value.email.value,
+            value = loginState.value.email.text,
             onValueChange = { email -> loginViewmodel.updateEmailField(email) },
             placeholder = "Email",
             errorMessage = loginState.value.email.errorMessage,
@@ -71,7 +68,7 @@ fun LoginScreen(
         )
 
         PasswordInputField(
-            value = loginState.value.password.value,
+            value = loginState.value.password.text,
             onValueChange = { loginViewmodel.updatePassword(it) },
             placeholder = "Password",
             errorMessage = loginState.value.password.errorMessage,
