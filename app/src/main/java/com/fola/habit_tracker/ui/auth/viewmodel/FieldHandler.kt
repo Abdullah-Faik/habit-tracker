@@ -13,3 +13,12 @@ data class LoginScreenState(
     val email: FieldHandler = FieldHandler(),
     val password: FieldHandler = FieldHandler()
 )
+
+
+enum class AuthScreen() {
+    LOGIN,
+    REGISTER,
+    RESETPASSWORD,
+    START
+
+}

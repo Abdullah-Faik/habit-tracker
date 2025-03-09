@@ -34,6 +34,7 @@ import com.fola.habit_tracker.ui.components.StyledButton
 @Composable
 fun ResetPasswordScreen(
     modifier: Modifier = Modifier,
+    onBackButton: () -> Unit = {},
     resetViewmodel: ResetPasswordViewmodel = viewModel()
 ) {
 
@@ -43,7 +44,7 @@ fun ResetPasswordScreen(
             Box(
                 modifier = Modifier
                     .padding(top = 32.dp, start = 16.dp)
-                    .clickable(onClick = {})
+                    .clickable(onClick = onBackButton)
             ) {
                 Image(
                     painter = painterResource(R.drawable.back_step),
@@ -89,7 +90,7 @@ fun ResetPasswordScreen(
                     color = Color.Gray
                 )
                 IconButton(
-                    onClick = {},
+                    onClick = onBackButton,
                     Modifier.width(IntrinsicSize.Min)
                 ) {
                     Text(

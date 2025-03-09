@@ -39,6 +39,7 @@ import com.fola.habit_tracker.ui.components.UiState
 @Composable
 fun RegisterScreen(
     modifier: Modifier = Modifier,
+    onBackButton: () -> Unit = {},
     registerViewmodel: RegisterViewmodel = viewModel()
 ) {
     val emailState = registerViewmodel.emailState.collectAsState()
@@ -49,11 +50,12 @@ fun RegisterScreen(
 
     Scaffold(
         topBar = {
-            Box(Modifier
-                .clickable(
-                    onClick = {}
-                )
-                .padding(top = 32.dp, start = 16.dp)
+            Box(
+                Modifier
+                    .clickable(
+                        onClick = onBackButton
+                    )
+                    .padding(top = 32.dp, start = 16.dp)
             )
             {
                 Image(
@@ -123,7 +125,7 @@ fun RegisterScreen(
                     color = Color.Gray
                 )
                 IconButton(
-                    onClick = {},
+                    onClick = onBackButton,
                     Modifier.width(IntrinsicSize.Min)
                 ) {
                     Text(

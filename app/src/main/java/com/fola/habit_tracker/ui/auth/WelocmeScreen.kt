@@ -26,9 +26,11 @@ import androidx.compose.ui.unit.sp
 import com.fola.habit_tracker.R
 import com.fola.habit_tracker.ui.components.interFont
 
-
 @Composable
-fun WelcomeScreen(modifier: Modifier = Modifier) {
+fun WelcomeScreen(
+    modifier: Modifier = Modifier,
+    onStartButton : () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,7 +69,7 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
         }
 
         Button(
-            onClick = {},
+            onClick = onStartButton,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorResource(R.color.main_color)
@@ -92,5 +94,4 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 private fun WelcomePrev() {
-    WelcomeScreen()
 }

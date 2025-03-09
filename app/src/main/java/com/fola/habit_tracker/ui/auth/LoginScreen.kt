@@ -39,6 +39,8 @@ import com.fola.habit_tracker.ui.components.StyledButton
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
+    onCreateAccount : () -> Unit = {},
+    onForgetPassword : () -> Unit = {},
     loginViewmodel: LoginViewmodel = viewModel()
 ) {
     val loginState = loginViewmodel.uiState.collectAsState()
@@ -81,7 +83,7 @@ fun LoginScreen(
         )
 
         IconButton(
-            onClick = { /* TODO: Handle forgot password */ },
+            onClick = onForgetPassword,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
@@ -101,7 +103,7 @@ fun LoginScreen(
         )
 
         StyledButton(
-            onClick = { /* TODO: Handle create account */ },
+            onClick = onCreateAccount,
             text = "Create account"
         )
     }
