@@ -1,8 +1,11 @@
 package com.fola.habit_tracker.ui.auth.viewmodel
 
+import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import com.fola.habit_tracker.ui.components.UiState
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -24,7 +27,7 @@ class ResetPasswordViewmodel : ViewModel() {
     }
 
 
-    private fun validateEmail(): Boolean {
+    private fun validateEmail(error : String = "Email is not valid"): Boolean {
         var isValid = false
         if (_emailState.value.text.isEmpty()) {
             _emailState.value = FieldHandler()
@@ -40,7 +43,7 @@ class ResetPasswordViewmodel : ViewModel() {
             _emailState.update {
                 it.copy(
                     state = UiState.ERROR,
-                    errorMessage = "Email is not valid"
+                    errorMessage =  error
                 )
             }
 
@@ -48,5 +51,21 @@ class ResetPasswordViewmodel : ViewModel() {
         return isValid
     }
 
+
+    fun resetPassword() {
+        if (validateEmail("Email is Required")){
+            Firebase.auth.sendPasswordResetEmail(_emailState.value.text)
+                .addOnCompleteListener {
+                    if(it.isSuccessful)
+                    {
+                        Log.d("passwordReset","email send success")
+                    } else {
+                        Log.d("passwordReset","can't send email")
+                        Log.d("passwordReset",it.exception?.localizedMessage ?: "error" )
+                    }
+                }
+
+        }
+    }
 
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -48,7 +49,9 @@ fun ResetPasswordScreen(
             ) {
                 Image(
                     painter = painterResource(R.drawable.back_step),
-                    contentDescription = "back"
+                    contentDescription = "back",
+                    modifier = Modifier.size(56.dp)
+
                 )
             }
         }
@@ -70,17 +73,22 @@ fun ResetPasswordScreen(
                 fontSize = 32.sp,
                 modifier = Modifier.padding(bottom = 48.dp)
             )
-            InputField(
-                value = uiState.value.text,
-                onValueChange = { value -> resetViewmodel.updateEmail(value) },
-                uiState = uiState.value.state,
-                errorMessage = uiState.value.errorMessage,
-                placeholder = "Email"
-            )
-            StyledButton(
-                onClick = {},
-                text = "Reset"
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(18.dp)
+
+            ){
+                InputField(
+                    value = uiState.value.text,
+                    onValueChange = { value -> resetViewmodel.updateEmail(value) },
+                    uiState = uiState.value.state,
+                    errorText = uiState.value.errorMessage,
+                    placeholder = "Email"
+                )
+                StyledButton(
+                    onClick = {resetViewmodel.resetPassword()},
+                    text = "Reset"
+                )
+            }
             Row(
                 verticalAlignment = Alignment.CenterVertically
             )

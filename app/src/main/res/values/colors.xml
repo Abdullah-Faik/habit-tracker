@@ -11,4 +11,5 @@
     <color name="main_color">#FF419CA7</color>
     <color name="Red">#F35959</color>
     <color name="dark_white">#C5BBB1</color>
+    <color name="error_container">#FFBEBE</color>
 </resources>

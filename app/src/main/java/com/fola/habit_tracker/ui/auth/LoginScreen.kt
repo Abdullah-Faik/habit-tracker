@@ -60,27 +60,34 @@ fun LoginScreen(
             modifier = Modifier.padding(bottom = 48.dp)
         )
 
-        InputField(
-            value = loginState.value.email.text,
-            onValueChange = { email -> loginViewmodel.updateEmailField(email) },
-            placeholder = "Email",
-            errorMessage = loginState.value.email.errorMessage,
-            uiState = loginState.value.email.state,
-            keyboardType = KeyboardType.Email
+        Column(
+            verticalArrangement = Arrangement.spacedBy(18.dp),
+            modifier = Modifier.padding(vertical = 18.dp)
         )
+        {
 
-        PasswordInputField(
-            value = loginState.value.password.text,
-            onValueChange = { loginViewmodel.updatePassword(it) },
-            placeholder = "Password",
-            errorMessage = loginState.value.password.errorMessage,
-            uiState = loginState.value.password.state
-        )
+            InputField(
+                value = loginState.value.email.text,
+                onValueChange = { email -> loginViewmodel.updateEmailField(email) },
+                placeholder = "Email",
+                errorText = loginState.value.email.errorMessage,
+                uiState = loginState.value.email.state,
+                keyboardType = KeyboardType.Email
+            )
 
-        StyledButton(
-            onClick = { /* TODO: Handle sign-in */ },
-            text = "Sign In"
-        )
+            PasswordInputField(
+                value = loginState.value.password.text,
+                onValueChange = { loginViewmodel.updatePassword(it) },
+                placeholder = "Password",
+                errorMessage = loginState.value.password.errorMessage,
+                uiState = loginState.value.password.state
+            )
+
+            StyledButton(
+                onClick = {loginViewmodel.signIn()},
+                text = "Sign In"
+            )
+        }
 
         IconButton(
             onClick = onForgetPassword,

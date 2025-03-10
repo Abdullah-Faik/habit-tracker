@@ -1,8 +1,14 @@
 package com.fola.habit_tracker.ui.auth.viewmodel
 
+import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import com.fola.habit_tracker.ui.components.UiState
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -29,7 +35,7 @@ class RegisterViewmodel : ViewModel() {
         validateEmail()
     }
 
-    private fun validateEmail(): Boolean {
+    private fun validateEmail(errorMsg: String = "Email is not valid"): Boolean {
         var isValid = false
         if (_emailState.value.text.isEmpty()) {
             _emailState.value = FieldHandler()
@@ -45,7 +51,7 @@ class RegisterViewmodel : ViewModel() {
             _emailState.update {
                 it.copy(
                     state = UiState.ERROR,
-                    errorMessage = "Email is not valid"
+                    errorMessage = errorMsg
                 )
             }
 
@@ -62,16 +68,16 @@ class RegisterViewmodel : ViewModel() {
         validateName()
     }
 
-    private fun validateName(error: String = ""): Boolean {
+    private fun validateName(errorMsg: String = ""): Boolean {
         var isValid = false
         if (_nameState.value.text.isEmpty()) {
-            if (error.isEmpty())
+            if (errorMsg.isEmpty())
                 _nameState.value = FieldHandler()
             else {
                 _nameState.update {
                     it.copy(
                         state = UiState.ERROR,
-                        errorMessage = error
+                        errorMessage = errorMsg
                     )
                 }
             }
@@ -99,7 +105,7 @@ class RegisterViewmodel : ViewModel() {
         validateRePassword("password is not match")
     }
 
-    private fun validatePassword(error: String): Boolean {
+    private fun validatePassword(errorMsg: String): Boolean {
         var isValid = false
         if (_password.value.text.isEmpty()) {
             _password.value = FieldHandler()
@@ -108,14 +114,14 @@ class RegisterViewmodel : ViewModel() {
             _password.update {
                 it.copy(
                     state = UiState.GOOD,
-                    errorMessage = error
+                    errorMessage = ""
                 )
             }
         } else {
             _password.update {
                 it.copy(
                     state = UiState.ERROR,
-                    errorMessage = error
+                    errorMessage = errorMsg
                 )
             }
         }
@@ -132,7 +138,7 @@ class RegisterViewmodel : ViewModel() {
         validateRePassword("password is not match")
     }
 
-    private fun validateRePassword(error: String): Boolean {
+    private fun validateRePassword(errorMsg: String): Boolean {
         var isValid = false
         if (_rePassword.value.text.isEmpty()) {
             _rePassword.value = FieldHandler()
@@ -148,11 +154,125 @@ class RegisterViewmodel : ViewModel() {
             _rePassword.update {
                 it.copy(
                     state = UiState.ERROR,
-                    errorMessage = error
+                    errorMessage = errorMsg
                 )
             }
         }
         return isValid
+    }
+
+    private fun validateFields(): Boolean {
+        var isValid = true
+
+        if (_emailState.value.state != UiState.GOOD) {
+            isValid = false
+            _emailState.update {
+                _emailState.value.copy(
+                    errorMessage = "Email Required",
+                    state = UiState.ERROR
+                )
+            }
+        }
+        if (_nameState.value.state != UiState.GOOD) {
+            isValid = false
+            _nameState.update {
+                _nameState.value.copy(
+                    errorMessage = "Name Required",
+                    state = UiState.ERROR
+                )
+            }
+        }
+        if (_password.value.state != UiState.GOOD) {
+            isValid = false
+            _password.update {
+                _password.value.copy(
+                    errorMessage = _password.value.errorMessage.ifEmpty { "Password Required" },
+                    state = UiState.ERROR
+                )
+            }
+        }
+        if (_rePassword.value.state != UiState.GOOD) {
+            isValid = false
+            _rePassword.update {
+                _rePassword.value.copy(
+                    state = UiState.ERROR,
+                    errorMessage = _rePassword.value.errorMessage.ifEmpty { "Confirmation Required" }
+                )
+            }
+        }
+        return isValid
+
+    }
+
+
+    fun addNewUser() {
+        if (validateFields()) {
+            val auth = Firebase.auth
+            val name = _nameState.value.text
+            val email = _emailState.value.text
+            val password = _password.value.text
+            auth.createUserWithEmailAndPassword(
+                email, password
+            ).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("signup", "userAddedSuccess")
+                    auth.currentUser?.let { user ->
+                        verifiedEmail(user)
+                        addUserToDatabase(
+                            user,
+                            name = name,
+                            email = email
+                        )
+                    }
+                } else {
+                    Log.d("signup", "user can't be add")
+                    Log.d("signup", task.exception?.localizedMessage ?: "error")
+                }
+            }
+        }
+    }
+
+    private fun verifiedEmail(user: FirebaseUser) {
+        user.sendEmailVerification().addOnCompleteListener {
+            if (it.isSuccessful) {
+                Log.d("signup", "verification email send")
+            } else {
+                Log.d("signup", "can't send email")
+            }
+        }
+    }
+
+    private fun addUserToDatabase(user: FirebaseUser, email: String, name: String) {
+        val userId = user.uid
+
+
+        val profileUpdates = userProfileChangeRequest {
+            displayName = name
+        }
+        user.updateProfile(profileUpdates)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("FirebaseAuth", "User profile updated: $name")
+                } else {
+                    Log.e("FirebaseAuth", "Profile update failed", task.exception)
+                }
+            }
+
+        val userData = hashMapOf(
+            "uuid" to userId,
+            "name" to name,
+            "email" to email
+        )
+        val db = Firebase.firestore
+        db.collection("users")
+            .document(userId)
+            .set(userData)
+            .addOnSuccessListener {
+                Log.d("add user", "document id is $userId")
+            }.addOnFailureListener {
+                Log.d("add user", it.toString())
+            }
+
     }
 
 

@@ -51,23 +51,25 @@ fun PasswordInputField(
         shape = RoundedCornerShape(50.dp),
         singleLine = true,
         isError = uiState == UiState.ERROR,
-        supportingText = {
-            if (uiState == UiState.ERROR && errorMessage.isNotEmpty()) {
+        label = if (uiState == UiState.ERROR && errorMessage.isNotEmpty()) {
+            {
                 Text(
                     text = errorMessage,
-                    color = Color.Red
                 )
             }
-        },
+        } else null,
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
             errorIndicatorColor = Color.Transparent,
-            errorContainerColor = Color.White,
+            errorContainerColor = colorResource(R.color.error_container),
             focusedContainerColor = Color.White,
-            errorTextColor = colorResource(R.color.Red),
-            cursorColor = Color.Black
+            errorTextColor = Color.Black,//colorResource(R.color.Red),
+            cursorColor = Color.Black,
+            errorLabelColor = Color.Red,
+            errorPlaceholderColor = colorResource(R.color.Red)
+
         ),
         trailingIcon = {
             val image = if (isPasswordVisible)

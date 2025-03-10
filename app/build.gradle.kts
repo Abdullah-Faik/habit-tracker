@@ -65,7 +65,10 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     //firebase
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-firestore")
+
     //viewmodel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     //navigation

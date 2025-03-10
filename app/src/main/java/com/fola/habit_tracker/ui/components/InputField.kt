@@ -23,7 +23,7 @@ fun InputField(
     placeholder: String = "",
     keyboardType: KeyboardType = KeyboardType.Email,
     uiState: UiState = UiState.IDLE,
-    errorMessage: String = ""
+    errorText: String = ""
 ) {
     TextField(
         value = value,
@@ -37,23 +37,25 @@ fun InputField(
         shape = RoundedCornerShape(50.dp),
         singleLine = true,
         isError = uiState == UiState.ERROR,
-        supportingText = {
-            if (uiState == UiState.ERROR && errorMessage.isNotEmpty()) {
+        label = if (uiState == UiState.ERROR && errorText.isNotEmpty()) {
+            {
                 Text(
-                    text = errorMessage,
-                    color = Color.Red
+                    text = errorText,
                 )
             }
-        },
+        } else null,
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
             errorIndicatorColor = Color.Transparent,
             focusedContainerColor = Color.White,
-            errorContainerColor = Color.White,
-            errorTextColor = colorResource(R.color.Red),
-            cursorColor = Color.Black
+            errorContainerColor = colorResource(R.color.error_container),
+            errorTextColor =  Color.Black,//colorResource(R.color.Black),
+            cursorColor = Color.Black,
+            errorLabelColor = Color.Red,
+            errorPlaceholderColor = colorResource(R.color.Red)
+
         ),
         modifier = Modifier
             .fillMaxWidth()

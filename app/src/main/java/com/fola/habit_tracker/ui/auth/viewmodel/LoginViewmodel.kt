@@ -1,8 +1,11 @@
 package com.fola.habit_tracker.ui.auth.viewmodel
 
+import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import com.fola.habit_tracker.ui.components.UiState
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -105,6 +108,56 @@ class LoginViewmodel : ViewModel() {
             }
         }
         return isValid
+    }
+
+    private fun validateFields(): Boolean {
+        var isValid = true
+
+        if (_loginScreenState.value.email.state != UiState.GOOD) {
+            isValid = false
+            _loginScreenState.update { loginState ->
+                loginState.copy(
+                    email = _loginScreenState.value.email.copy(
+                        state = UiState.ERROR,
+                        errorMessage = _loginScreenState.value.email.errorMessage.ifEmpty {
+                            "Email Required"
+                        }
+                    )
+                )
+
+            }
+        }
+
+        if (_loginScreenState.value.password.state != UiState.GOOD) {
+            isValid = false
+            _loginScreenState.update { loginState ->
+                loginState.copy(
+                    password = _loginScreenState.value.password.copy(
+                        errorMessage = _loginScreenState.value.password.errorMessage.ifEmpty
+                        { "Password Required" },
+                        state = UiState.ERROR
+                    )
+                )
+            }
+        }
+        return isValid
+
+    }
+
+    fun signIn() {
+        if (validateFields()) {
+            val email = _loginScreenState.value.email.text
+            val password = _loginScreenState.value.password.text
+            val auth = Firebase.auth
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener {
+                    if (it.isSuccessful)
+                        Log.d("signin", "signInWithEmail:success")
+                    else
+                        Log.w("signin", "signInWithEmail:failure", it.exception)
+
+                }
+        }
     }
 
 

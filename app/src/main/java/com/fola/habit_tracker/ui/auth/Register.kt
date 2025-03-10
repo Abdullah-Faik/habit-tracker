@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -32,7 +33,6 @@ import com.fola.habit_tracker.ui.auth.viewmodel.RegisterViewmodel
 import com.fola.habit_tracker.ui.components.InputField
 import com.fola.habit_tracker.ui.components.PasswordInputField
 import com.fola.habit_tracker.ui.components.StyledButton
-import com.fola.habit_tracker.ui.components.UiState
 
 
 @SuppressLint("ResourceType")
@@ -60,7 +60,8 @@ fun RegisterScreen(
             {
                 Image(
                     painter = painterResource(R.drawable.back_step),
-                    contentDescription = ""
+                    contentDescription = "",
+                    modifier = Modifier.size(56.dp)
                 )
             }
         }
@@ -82,38 +83,41 @@ fun RegisterScreen(
                 fontSize = 32.sp,
                 modifier = Modifier.padding(bottom = 36.dp)
             )
-
-            InputField(
-                value = nameState.value.text,
-                onValueChange = { value -> registerViewmodel.updateName(value) },
-                placeholder = "Name",
-                errorMessage = nameState.value.errorMessage,
-                uiState = nameState.value.state
-            )
-            InputField(
-                value = emailState.value.text,
-                onValueChange = { value -> registerViewmodel.updateEmail(value) },
-                placeholder = "Email",
-                errorMessage = emailState.value.errorMessage,
-                uiState = emailState.value.state
-            )
-            PasswordInputField(
-                value = password.value.text,
-                onValueChange = { value -> registerViewmodel.updatePassword(value) },
-                placeholder = "Password",
-                errorMessage = password.value.errorMessage,
-                uiState = password.value.state,
-            )
-            PasswordInputField(
-                value = rePassword.value.text,
-                onValueChange = { value -> registerViewmodel.updateRePassword(value) },
-                placeholder = "Confirm Password",
-                errorMessage = rePassword.value.errorMessage,
-                uiState = rePassword.value.state
-            )
-
+            Column(
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+                modifier = Modifier.padding(vertical = 18.dp)
+            ) {
+                InputField(
+                    value = nameState.value.text,
+                    onValueChange = { value -> registerViewmodel.updateName(value) },
+                    placeholder = "Name",
+                    errorText = nameState.value.errorMessage,
+                    uiState = nameState.value.state
+                )
+                InputField(
+                    value = emailState.value.text,
+                    onValueChange = { value -> registerViewmodel.updateEmail(value) },
+                    placeholder = "Email",
+                    errorText = emailState.value.errorMessage,
+                    uiState = emailState.value.state
+                )
+                PasswordInputField(
+                    value = password.value.text,
+                    onValueChange = { value -> registerViewmodel.updatePassword(value) },
+                    placeholder = "Password",
+                    errorMessage = password.value.errorMessage,
+                    uiState = password.value.state,
+                )
+                PasswordInputField(
+                    value = rePassword.value.text,
+                    onValueChange = { value -> registerViewmodel.updateRePassword(value) },
+                    placeholder = "Confirm Password",
+                    errorMessage = rePassword.value.errorMessage,
+                    uiState = rePassword.value.state
+                )
+            }
             StyledButton(
-                onClick = {},
+                onClick = { registerViewmodel.addNewUser() },
                 text = "Sign Up"
             )
             Row(
