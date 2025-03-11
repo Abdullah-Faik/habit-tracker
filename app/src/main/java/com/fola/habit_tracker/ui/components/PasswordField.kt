@@ -32,7 +32,7 @@ fun PasswordInputField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String = "",
-    keyboardType: KeyboardType = KeyboardType.Email,
+    keyboardType: KeyboardType = KeyboardType.Password,
     uiState: UiState = UiState.IDLE,
     errorMessage: String = ""
 ) {

@@ -10,12 +10,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -35,6 +42,7 @@ import com.fola.habit_tracker.ui.components.PasswordInputField
 import com.fola.habit_tracker.ui.components.StyledButton
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("ResourceType")
 @Composable
 fun RegisterScreen(
@@ -50,26 +58,37 @@ fun RegisterScreen(
 
     Scaffold(
         topBar = {
-            Box(
-                Modifier
-                    .clickable(
-                        onClick = onBackButton
+            TopAppBar(
+                title = {},
+                navigationIcon = {
+                    Box(
+                        Modifier
+                            .clickable(
+                                onClick = onBackButton
+                            )
+                            .padding(start = 8.dp)
                     )
-                    .padding(top = 32.dp, start = 16.dp)
-            )
-            {
-                Image(
-                    painter = painterResource(R.drawable.back_step),
-                    contentDescription = "",
-                    modifier = Modifier.size(56.dp)
+                    {
+                        Image(
+                            painter = painterResource(R.drawable.back_step),
+                            contentDescription = "",
+                            modifier = Modifier.size(56.dp)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = colorResource(R.color.basic_background)
                 )
-            }
+
+            )
         }
 
     ) { innerPadding ->
         Column(
             modifier = modifier
                 .fillMaxSize()
+                .imePadding()
+                .verticalScroll(rememberScrollState())
                 .background(color = colorResource(R.color.basic_background))
                 .padding(horizontal = 16.dp, vertical = 32.dp)
                 .padding(innerPadding),
@@ -85,7 +104,8 @@ fun RegisterScreen(
             )
             Column(
                 verticalArrangement = Arrangement.spacedBy(18.dp),
-                modifier = Modifier.padding(vertical = 18.dp)
+                modifier = Modifier
+                    .padding(vertical = 18.dp)
             ) {
                 InputField(
                     value = nameState.value.text,
@@ -93,6 +113,7 @@ fun RegisterScreen(
                     placeholder = "Name",
                     errorText = nameState.value.errorMessage,
                     uiState = nameState.value.state
+
                 )
                 InputField(
                     value = emailState.value.text,
