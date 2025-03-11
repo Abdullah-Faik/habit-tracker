@@ -3,15 +3,19 @@ package com.fola.habit_tracker.ui.auth.viewmodel
 import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.fola.habit_tracker.ui.components.UiState
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class RegisterViewmodel : ViewModel() {
 
@@ -19,11 +23,14 @@ class RegisterViewmodel : ViewModel() {
     private val _emailState = MutableStateFlow(FieldHandler())
     private val _password = MutableStateFlow(FieldHandler())
     private val _rePassword = MutableStateFlow(FieldHandler())
+    private val _snackbarEvent = Channel<String>(Channel.BUFFERED)
+
 
     val nameState = _nameState.asStateFlow()
     val emailState = _emailState.asStateFlow()
     val password = _password.asStateFlow()
     val rePassword = _rePassword.asStateFlow()
+    val snackbarEvent = _snackbarEvent.receiveAsFlow()
 
 
     fun updateEmail(text: String) {
@@ -227,6 +234,8 @@ class RegisterViewmodel : ViewModel() {
                 } else {
                     Log.d("signup", "user can't be add")
                     Log.d("signup", task.exception?.localizedMessage ?: "error")
+                    showSnackbar(task.exception?.message.toString())
+
                 }
             }
         }
@@ -235,9 +244,12 @@ class RegisterViewmodel : ViewModel() {
     private fun verifiedEmail(user: FirebaseUser) {
         user.sendEmailVerification().addOnCompleteListener {
             if (it.isSuccessful) {
+                Log.d("SNACKBAR", "MESSAGE IS $snackbarEvent")
+                showSnackbar("Verification Email send check your mailbox!")
                 Log.d("signup", "verification email send")
             } else {
                 Log.d("signup", "can't send email")
+                showSnackbar(it.exception?.message.toString())
             }
         }
     }
@@ -275,5 +287,10 @@ class RegisterViewmodel : ViewModel() {
 
     }
 
+    private fun showSnackbar(message: String) {
+        viewModelScope.launch {
+            _snackbarEvent.send(message)
+        }
+    }
 
 }

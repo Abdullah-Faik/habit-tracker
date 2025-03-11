@@ -23,7 +23,7 @@ fun AuthModule(modifier: Modifier = Modifier) {
         {
             LoginScreen(
                 onForgetPassword = {
-                    navController.navigate(AuthScreen.RESETPASSWORD.name) {
+                    navController.navigate(AuthScreen.RESET_PASSWORD.name) {
                         launchSingleTop = true
                     }
                 },
@@ -55,7 +55,7 @@ fun AuthModule(modifier: Modifier = Modifier) {
                 }
             )
         }
-        composable(route = AuthScreen.RESETPASSWORD.name) {
+        composable(route = AuthScreen.RESET_PASSWORD.name) {
             ResetPasswordScreen(
                 onBackButton = {
                     navController.popBackStack(AuthScreen.LOGIN.name, inclusive = false)

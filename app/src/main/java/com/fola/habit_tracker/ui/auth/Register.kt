@@ -19,12 +19,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,7 +48,7 @@ import com.fola.habit_tracker.ui.components.StyledButton
 
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("ResourceType")
+@SuppressLint("ResourceType", "StateFlowValueCalledInComposition")
 @Composable
 fun RegisterScreen(
     modifier: Modifier = Modifier,
@@ -54,9 +59,29 @@ fun RegisterScreen(
     val nameState = registerViewmodel.nameState.collectAsState()
     val password = registerViewmodel.password.collectAsState()
     val rePassword = registerViewmodel.rePassword.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(key1 = registerViewmodel) {
+        registerViewmodel.snackbarEvent.collect { message ->
+            snackbarHostState.showSnackbar(
+                message,
+                duration = SnackbarDuration.Long
+            )
+        }
+    }
 
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(snackbarHostState, snackbar = {
+                Snackbar(
+                    snackbarData = it,
+                    containerColor = colorResource(R.color.main_color),
+                    contentColor = colorResource(R.color.black),
+                )
+
+            })
+        },
         topBar = {
             TopAppBar(
                 title = {},

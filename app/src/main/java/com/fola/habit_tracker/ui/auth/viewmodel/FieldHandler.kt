@@ -18,7 +18,7 @@ data class LoginScreenState(
 enum class AuthScreen() {
     LOGIN,
     REGISTER,
-    RESETPASSWORD,
+    RESET_PASSWORD,
     START
 
 }

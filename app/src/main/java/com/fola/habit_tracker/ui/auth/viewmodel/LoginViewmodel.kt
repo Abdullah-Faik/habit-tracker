@@ -3,18 +3,25 @@ package com.fola.habit_tracker.ui.auth.viewmodel
 import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.fola.habit_tracker.ui.components.UiState
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class LoginViewmodel : ViewModel() {
 
     private val _loginScreenState = MutableStateFlow(LoginScreenState())
     val uiState: StateFlow<LoginScreenState> = _loginScreenState.asStateFlow()
+    private val _snackbarEvent = Channel<String>(Channel.BUFFERED)
+    val snackbarEvent = _snackbarEvent.receiveAsFlow()
+
 
 
     fun updateEmailField(text: String) {
@@ -152,11 +159,16 @@ class LoginViewmodel : ViewModel() {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener {
                     if (it.isSuccessful)
-                        Log.d("signin", "signInWithEmail:success")
+                        showSnackbar("Login Successfully")
                     else
-                        Log.w("signin", "signInWithEmail:failure", it.exception)
+                        showSnackbar(it.exception?.message.toString())
 
                 }
+        }
+    }
+    private fun showSnackbar(message: String) {
+        viewModelScope.launch {
+            _snackbarEvent.send(message)
         }
     }
 
