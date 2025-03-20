@@ -10,3 +10,12 @@ val interFont = FontFamily(
     Font(R.font.inter_18pt_black, FontWeight.Black),
     Font(R.font.inter_24pt_extra_bold, FontWeight.ExtraBold)
 )
+
+
+val mainFont = FontFamily(
+    Font(R.font.airbnb_cereal_w_lt, FontWeight.Light),
+    Font(R.font.airbnb_cereal_w_md, FontWeight.Normal),
+    Font(R.font.airbnb_cereal_w_blk, FontWeight.ExtraBold),
+    Font(R.font.airbnb_cereal_w_bd, FontWeight.Bold),
+    Font(R.font.airbnb_cereal_w_bk, FontWeight.Black)
+)
