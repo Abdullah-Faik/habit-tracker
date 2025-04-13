@@ -12,7 +12,12 @@
           "package_name": "com.fola.habit_tracker"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "777595537496-vc041ktj2scg9a1j6ek4hj7cgiuu1di6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBqY2Yg_94Z9iZ8mBSlzCGcgeB8xJYEJT0"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "777595537496-vc041ktj2scg9a1j6ek4hj7cgiuu1di6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

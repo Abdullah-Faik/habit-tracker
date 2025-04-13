@@ -110,6 +110,7 @@ private fun DataRowPrev() {
     DateRow()
 }
 
+@Preview
 @Composable
 private fun DateCardPrev() {
     DateDayCard()
