@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,20 +27,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fola.habit_tracker.R
 import com.fola.habit_tracker.ui.components.mainFont
+import com.fola.habit_tracker.ui.theme.AppTheme
 
 
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
 
     Scaffold(
-        containerColor = colorResource(R.color.basic_background)
+        containerColor = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
-                .padding(top = 24.dp)
-                .background(colorResource(R.color.basic_background))
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Row(
                 modifier = Modifier
@@ -58,13 +59,13 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                         painter = painterResource(R.drawable.avatar),
                         contentDescription = "avatar",
                         Modifier
-                            .size(128.dp)
+                            .size(98.dp)
                     )
                     Text(
                         text = "HI, Name \uD83D\uDC4B\uD83C\uDFFB",
                         fontWeight = FontWeight.Bold,
                         fontFamily = mainFont,
-                        color = colorResource(R.color.white),
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 20.sp
                     )
                 }
@@ -72,8 +73,8 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                     onClick = {},
                     modifier = Modifier
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xff1E1E1E))
-                        .size(64.dp)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                        .size(52.dp)
                 ) {
                     Image(
                         painter = painterResource(R.drawable.calendar),
@@ -83,14 +84,24 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 }
             }
             DateRow()
+            ProgressCard(modifier = Modifier.padding(horizontal = 12.dp))
         }
 
 
     }
 }
 
-@Preview
+@Preview(showSystemUi = true)
 @Composable
 private fun HomePrev() {
-    HomeScreen()
+    AppTheme {
+        HomeScreen()
+    }
+}
+@Preview(showSystemUi = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun HomeDarkPrev() {
+    AppTheme {
+        HomeScreen()
+    }
 }

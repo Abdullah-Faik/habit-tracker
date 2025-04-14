@@ -7,9 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import com.fola.habit_tracker.ui.auth.AuthModule
 import com.fola.habit_tracker.ui.main.home.HomeScreen
-import com.fola.habit_tracker.ui.theme.HabittrackerTheme
+import com.fola.habit_tracker.ui.theme.AppTheme
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
@@ -19,10 +18,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            HabittrackerTheme {
+            AppTheme {
                 Scaffold {
-                    //HomeScreen(modifier = Modifier.padding(it))
-                    AuthModule(modifier = Modifier.padding(it))
+                    HomeScreen(modifier = Modifier.padding(it))
+                    //AuthModule(modifier = Modifier.padding(it))
                 }
             }
         }

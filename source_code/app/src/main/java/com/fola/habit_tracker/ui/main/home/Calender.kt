@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,7 +41,7 @@ fun DateRow(modifier: Modifier = Modifier) {
 
 
     LaunchedEffect(Unit) {
-        listState.scrollToItem(todayIndex)
+        listState.scrollToItem(todayIndex - 2)
     }
 
     LazyRow(
@@ -76,9 +77,9 @@ fun DateDayCard(
             .border(
                 width = if (isCurrentDay) (1.5).dp else (-1).dp,
                 shape = RoundedCornerShape(16.dp),
-                color = colorResource(R.color.main_color)
+                color = MaterialTheme.colorScheme.primary
             )
-            .background(color = colorResource(R.color.secondary_background_color))
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .defaultMinSize(minWidth = 56.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -91,12 +92,12 @@ fun DateDayCard(
 
             Text(
                 dayNumber,
-                color = colorResource(R.color.main_color),
+                color = if (isCurrentDay) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 fontSize = 20.sp
             )
             Text(
                 text = dayName,
-                color = if (isCurrentDay) colorResource(R.color.main_color) else colorResource(R.color.white),
+                color = if (isCurrentDay) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 fontSize = 14.sp
             )
         }
