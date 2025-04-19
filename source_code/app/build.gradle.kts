@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -76,5 +77,14 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.8")
     //datetime
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.2")
+    //room
+    implementation("androidx.room:room-runtime:2.7.0")
+    ksp("androidx.room:room-compiler:2.7.0")
+    implementation("androidx.room:room-ktx:2.7.0")
+
+
+
+
+
 
 }

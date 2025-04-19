@@ -2,7 +2,6 @@ package com.fola.habit_tracker.ui.main.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,11 +19,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fola.habit_tracker.R
+import com.fola.habit_tracker.ui.theme.AppTheme
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
@@ -79,7 +77,7 @@ fun DateDayCard(
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.primary
             )
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .background(if (isCurrentDay) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerLow)
             .defaultMinSize(minWidth = 56.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -108,7 +106,9 @@ fun DateDayCard(
 @Preview(showBackground = true, backgroundColor = 0xffffff)
 @Composable
 private fun DataRowPrev() {
+    AppTheme {
     DateRow()
+        }
 }
 
 @Preview
