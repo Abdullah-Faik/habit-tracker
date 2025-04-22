@@ -44,7 +44,7 @@ fun DateRow(modifier: Modifier = Modifier) {
 
     LazyRow(
         state = listState,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
     ) {
         items(dates) { date ->

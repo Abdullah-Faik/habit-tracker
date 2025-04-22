@@ -13,7 +13,6 @@ fun AuthModule(modifier: Modifier = Modifier) {
 
     val navController = rememberNavController()
 
-
     NavHost(
         navController = navController,
         startDestination = AuthScreen.START.name,

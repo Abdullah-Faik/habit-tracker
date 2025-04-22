@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.fola.habit_tracker.ui.main.home.HomeScreen
+import com.fola.habit_tracker.ui.main.navigation_bar.MainApp
 import com.fola.habit_tracker.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,9 +23,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 Scaffold {
-                    HomeScreen(
-                        modifier = Modifier.padding(it),
+                    MainApp(
+                        modifier = Modifier.padding(it)
                     )
+
                 }
             }
         }

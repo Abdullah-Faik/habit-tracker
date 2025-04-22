@@ -14,8 +14,13 @@ class FakeHabitsRepository : HabitsRepository {
             listOf(
                 Habit(id = 1, title = "Drink Water", repeatedType = RepeatedType.DAILY),
                 Habit(id = 2, title = "Read Book", repeatedType = RepeatedType.NONE),
-                Habit(id = 3, title = "Exercise", reminderTime = LocalTime.now())
-            )
+                Habit(id = 3, title = "Exercise", reminderTime = LocalTime.now()),
+                Habit(id = 3, title = "Exercise", reminderTime = LocalTime.now()),
+                Habit(id = 3, title = "Exercise", reminderTime = LocalTime.now()),
+                Habit(id = 3, title = "Exercise", reminderTime = LocalTime.now()),
+                Habit(id = 3, title = "Exercise", reminderTime = LocalTime.now()),
+
+                )
         )
     }
 

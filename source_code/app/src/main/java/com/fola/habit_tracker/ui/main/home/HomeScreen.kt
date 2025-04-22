@@ -1,5 +1,7 @@
 package com.fola.habit_tracker.ui.main.home
 
+import android.annotation.SuppressLint
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,17 +31,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fola.habit_tracker.R
-import com.fola.habit_tracker.data.data_base.Habit
-import com.fola.habit_tracker.data.data_base.RepeatedType
-import com.fola.habit_tracker.data.repositry.HabitsRepository
 import com.fola.habit_tracker.ui.components.icons.PlusSmall
 import com.fola.habit_tracker.ui.components.mainFont
+import com.fola.habit_tracker.ui.main.navigation_bar.BottomNavigationBar
+import com.fola.habit_tracker.ui.main.navigation_bar.Screen
 import com.fola.habit_tracker.ui.theme.AppTheme
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
-import java.time.LocalTime
 
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -57,13 +56,12 @@ fun HomeScreen(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50.dp))
                     .background(MaterialTheme.colorScheme.primary)
-                    .size(64.dp)
+                    .size(56.dp)
             )
-        }
+        },
     ) {
         Column(
             modifier = Modifier
-                .padding(it)
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
@@ -110,8 +108,13 @@ fun HomeScreen(
                     )
                 }
             }
-            DateRow()
-            ProgressCard(modifier = Modifier.padding(horizontal = 24.dp))
+            DateRow(
+                modifier = Modifier
+                    .padding(vertical = 4.dp)
+            )
+            ProgressCard(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -138,7 +141,7 @@ private fun HomePrev() {
     }
 }
 
-@Preview(showSystemUi = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Preview(showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun HomeDarkPrev() {
     AppTheme {

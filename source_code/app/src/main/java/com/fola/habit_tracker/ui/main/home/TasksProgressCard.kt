@@ -42,8 +42,8 @@ fun ProgressCard(modifier: Modifier = Modifier) {
                 progress = {
                     .2f
                 },
-                color = Color.White,
-                trackColor = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = Color.White,
                 modifier = Modifier
                     .padding(8.dp)
                     .size(72.dp),
