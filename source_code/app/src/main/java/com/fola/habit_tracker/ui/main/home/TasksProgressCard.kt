@@ -23,6 +23,7 @@ import com.fola.habit_tracker.ui.theme.AppTheme
 
 @Composable
 fun ProgressCard(modifier: Modifier = Modifier) {
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -34,10 +35,13 @@ fun ProgressCard(modifier: Modifier = Modifier) {
         Box(
             contentAlignment = Alignment.Center
         ) {
+
             CircularProgressIndicator(
-                progress = 0.2f, // Fixed: Pass the Float value directly
-                color = Color.White,
-                trackColor = MaterialTheme.colorScheme.primary,
+                progress = {
+                    .2f
+                },
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = Color.White,
                 modifier = Modifier
                     .padding(8.dp)
                     .size(72.dp),
