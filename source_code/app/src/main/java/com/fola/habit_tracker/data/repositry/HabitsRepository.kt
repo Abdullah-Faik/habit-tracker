@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface HabitsRepository {
 
-    suspend fun getAllHabits(): Flow<List<Habit>>
+    suspend fun getAllHabits(habit: Habit): Flow<List<Habit>>
 }
 
 
@@ -21,7 +21,7 @@ class DataBaseHabitsRepository(
     private val daysDao: DayDao = db.daoDao()
     private val habitDao: HabitsDao = db.habitDao()
 
-    override suspend fun getAllHabits(): Flow<List<Habit>> {
+    override suspend fun getAllHabits(habit: Habit): Flow<List<Habit>> {
         return habitDao.getAllHabits()
     }
 

@@ -13,6 +13,7 @@ import com.fola.habit_tracker.data.repositry.HabitsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 open class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel() {
@@ -20,15 +21,35 @@ open class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewM
     private val _habits = MutableStateFlow<List<Habit>>(emptyList())
     val habits: StateFlow<List<Habit>> = _habits.asStateFlow()
 
-
     init {
+        initializeHabits()
         getHabits()
+    }
+
+    private fun initializeHabits() {
+        viewModelScope.launch {
+            // Check if the database is empty
+            val currentHabits = habitsRepository.getAllHabits(Habit(title = "Drink Water")).first()
+            if (currentHabits.isEmpty()) {
+                // Insert some test habits
+                habitsRepository.getAllHabits(Habit(title = "Drink Water"))
+                habitsRepository.getAllHabits(Habit(title = "Read Book"))
+                habitsRepository.getAllHabits(Habit(title = "Exercise"))
+            }
+        }
+    }
+
+    fun addHabit(title: String) {
+        viewModelScope.launch {
+            habitsRepository.getAllHabits(Habit(title = title))
+        }
     }
 
     private fun getHabits() {
         viewModelScope.launch {
-            habitsRepository.getAllHabits().collect {
-                _habits.value = it
+            habitsRepository.getAllHabits(Habit(title = "Drink Water")).collect { habitsList ->
+                println("Fetched habits: $habitsList")
+                _habits.value = habitsList
             }
         }
     }
@@ -43,4 +64,3 @@ open class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewM
         }
     }
 }
-

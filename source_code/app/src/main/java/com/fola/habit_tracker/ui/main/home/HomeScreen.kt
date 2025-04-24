@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,16 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fola.habit_tracker.R
-import com.fola.habit_tracker.data.data_base.Habit
-import com.fola.habit_tracker.data.data_base.RepeatedType
-import com.fola.habit_tracker.data.repositry.HabitsRepository
 import com.fola.habit_tracker.ui.components.icons.PlusSmall
-import com.fola.habit_tracker.ui.components.mainFont
 import com.fola.habit_tracker.ui.theme.AppTheme
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
-import java.time.LocalTime
-
 
 @Composable
 fun HomeScreen(
@@ -52,7 +45,7 @@ fun HomeScreen(
         floatingActionButton = {
             Icon(
                 imageVector = PlusSmall,
-                contentDescription = "",
+                contentDescription = "Add Habit",
                 tint = Color.White,
                 modifier = Modifier
                     .clip(RoundedCornerShape(50.dp))
@@ -60,10 +53,10 @@ fun HomeScreen(
                     .size(64.dp)
             )
         }
-    ) {
+    ) { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(it)
+                .padding(paddingValues)
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
@@ -76,7 +69,6 @@ fun HomeScreen(
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -85,13 +77,12 @@ fun HomeScreen(
                     Image(
                         painter = painterResource(R.drawable.avatar),
                         contentDescription = "avatar",
-                        Modifier
+                        modifier = Modifier
                             .size(98.dp)
                     )
                     Text(
                         text = "HI, Name \uD83D\uDC4B\uD83C\uDFFB",
                         fontWeight = FontWeight.Bold,
-                        fontFamily = mainFont,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 20.sp
                     )
@@ -105,8 +96,8 @@ fun HomeScreen(
                 ) {
                     Image(
                         painter = painterResource(R.drawable.calendar),
-                        contentDescription = "ca`lender",
-                        Modifier.size(36.dp)
+                        contentDescription = "calendar",
+                        modifier = Modifier.size(36.dp)
                     )
                 }
             }
@@ -117,11 +108,20 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
             ) {
-                items(1) {
-                    habits.value.forEach {
+                if (habits.value.isEmpty()) {
+                    item {
+                        Text(
+                            text = "No habits available. Add a habit to get started!",
+                            modifier = Modifier.padding(16.dp),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                } else {
+                    items(habits.value) { habit ->
                         TasksCard(
                             modifier = Modifier.padding(vertical = 2.dp),
-                            habit = it, progress = .7f
+                            habit = habit,
+                            progress = 0.7f
                         )
                     }
                 }

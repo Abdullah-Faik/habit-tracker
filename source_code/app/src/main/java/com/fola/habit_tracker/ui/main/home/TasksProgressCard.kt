@@ -23,25 +23,19 @@ import com.fola.habit_tracker.ui.theme.AppTheme
 
 @Composable
 fun ProgressCard(modifier: Modifier = Modifier) {
-
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .shadow(8.dp)
-            .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
-
-        ,
+            .background(color = MaterialTheme.colorScheme.surfaceContainerHighest),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             contentAlignment = Alignment.Center
         ) {
-
             CircularProgressIndicator(
-                progress = {
-                    .2f
-                },
+                progress = 0.2f, // Fixed: Pass the Float value directly
                 color = Color.White,
                 trackColor = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -57,18 +51,16 @@ fun ProgressCard(modifier: Modifier = Modifier) {
         }
         Column {
             Text(
-                "You Are On Fire  \uD83D\uDD25",
+                text = "You Are On Fire  \uD83D\uDD25",
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                "1 of 5 Completed",
+                text = "1 of 5 Completed",
                 color = MaterialTheme.colorScheme.primary
             )
         }
     }
-
 }
-
 
 @Preview(showBackground = true)
 @Composable

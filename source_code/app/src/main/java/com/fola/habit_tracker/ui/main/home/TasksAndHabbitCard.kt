@@ -1,7 +1,6 @@
 package com.fola.habit_tracker.ui.main.home
 
 import android.content.res.Configuration
-import android.widget.ProgressBar
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,10 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,7 +38,7 @@ fun TasksCard(
     modifier: Modifier = Modifier,
     habit: Habit,
     onClickable: () -> Unit = {},
-    progress : Float = .4f
+    progress: Float = 0.4f
 ) {
     Row(
         modifier = modifier
@@ -53,9 +49,7 @@ fun TasksCard(
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
-
     ) {
-
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -64,10 +58,10 @@ fun TasksCard(
                 contentDescription = "",
                 modifier = Modifier
                     .padding(4.dp)
-                    .clip(RoundedCornerShape(20))
+                    .clip(RoundedCornerShape(20.dp))
                     .size(40.dp)
                     .aspectRatio(1f)
-                    .border((2).dp, Color.White, RoundedCornerShape(20)),
+                    .border(2.dp, Color.White, RoundedCornerShape(20.dp)),
                 contentScale = ContentScale.Crop
             )
             Column {
@@ -77,12 +71,11 @@ fun TasksCard(
                 )
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(20))
+                        .clip(RoundedCornerShape(20.dp))
                         .background(MaterialTheme.colorScheme.onSecondary)
                         .padding(horizontal = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
-
                 ) {
                     Text(
                         text = if (habit.repeatedType == RepeatedType.NONE) "Task" else "Habit",
@@ -90,7 +83,7 @@ fun TasksCard(
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        text = "⏰ ${habit.reminderTime.format(DateTimeFormatter.ofPattern("hh:mm a"))}",
+                        text = habit.reminderTime?.let { "⏰ ${it.format(DateTimeFormatter.ofPattern("hh:mm a"))}" } ?: "No reminder",
                         fontSize = 10.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -99,15 +92,14 @@ fun TasksCard(
         }
         Box {
             CircularProgressIndicator(
-                progress = {progress},
+                progress = progress, // Fixed: Pass the Float value directly
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                 modifier = Modifier
                     .padding(8.dp)
                     .size(40.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(brush = SolidColor(Color(0xB766E36A)),alpha = progress)
-                ,
+                    .clip(RoundedCornerShape(50.dp))
+                    .background(Color(0xB766E36A).copy(alpha = progress)),
                 strokeWidth = 4.dp
             )
         }

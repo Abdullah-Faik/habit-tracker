@@ -24,7 +24,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fola.habit_tracker.R
-import com.fola.habit_tracker.ui.components.interFont
 
 @Composable
 fun WelcomeScreen(
@@ -55,7 +54,7 @@ fun WelcomeScreen(
                 text = "Habit".uppercase(),
                 color = Color.White,
                 fontSize = 64.sp,
-                fontFamily = interFont,
+
                 fontWeight = FontWeight.ExtraBold
             )
             Text(
@@ -64,7 +63,7 @@ fun WelcomeScreen(
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Normal,
-                fontFamily = interFont
+
             )
         }
 
@@ -78,7 +77,6 @@ fun WelcomeScreen(
             Text(
                 text = "Lets Go",
                 color = Color.White,
-                fontFamily = interFont,
                 fontWeight = FontWeight.Black,
                 fontSize = 24.sp,
                 modifier = Modifier.padding(12.dp)
@@ -94,4 +92,6 @@ fun WelcomeScreen(
 @Preview
 @Composable
 private fun WelcomePrev() {
+    WelcomeScreen {
+    }
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.fola.habit_tracker.ui.main.home.HomeScreen
+import com.fola.habit_tracker.ui.task_screen.TaskNavigation
 import com.fola.habit_tracker.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,7 +22,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AppTheme {
+                TaskNavigation()
                 Scaffold {
+                    // Uses NavHost to manage screens
                     HomeScreen(
                         modifier = Modifier.padding(it),
                     )
