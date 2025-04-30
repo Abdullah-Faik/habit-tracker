@@ -36,7 +36,8 @@ fun MainApp(modifier: Modifier = Modifier) {
             composable(Screen.Habit.route) { HabitScreen(navController) }
             composable(Screen.Timer.route) { TimerScreen() }
             composable(Screen.Calendar.route) { CalenderScreen() }
-            composable(Screen.Profile.route) { ProfileScreen(viewModel = viewModel()) }
+            composable(Screen.Profile.route) { ProfileScreen() }
+
         }
     }
 }

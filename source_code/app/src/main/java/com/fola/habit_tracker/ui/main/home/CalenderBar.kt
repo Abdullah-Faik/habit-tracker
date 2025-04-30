@@ -41,7 +41,7 @@ fun DateRow(modifier: Modifier = Modifier, onCardPress: (LocalDate) -> Unit = {}
 
 
     LaunchedEffect(Unit) {
-        listState.scrollToItem(todayIndex - 2)
+        listState.scrollToItem((todayIndex - 2).coerceAtLeast(0))
     }
 
     LazyRow(

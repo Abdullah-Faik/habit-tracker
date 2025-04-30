@@ -45,13 +45,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.fola.habit_tracker.ui.components.interFont
 import com.fola.habit_tracker.ui.task_screen.TaskNavigation
 import com.fola.habit_tracker.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddingTaskScreen(navController: NavController) {
+fun AddingHabitScreen(navController: NavController) {
     var taskName by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     Scaffold(modifier = Modifier.fillMaxWidth()) { innerPadding ->
@@ -246,7 +247,7 @@ fun AddingTaskScreen(navController: NavController) {
 @Composable
 fun AddingTaskLightPrev() {
     AppTheme {
-        TaskNavigation() // CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
+        AddingHabitScreen(navController = rememberNavController()) // CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
     }
 }
 
@@ -254,6 +255,6 @@ fun AddingTaskLightPrev() {
 @Composable
 private fun AddingTaskDarkPrev() {
     AppTheme {
-        TaskNavigation() // CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
+        AddingHabitScreen(navController = rememberNavController()) // CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
     }
 }
