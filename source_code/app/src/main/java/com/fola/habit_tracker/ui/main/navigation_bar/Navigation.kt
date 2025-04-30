@@ -18,7 +18,6 @@ import com.fola.habit_tracker.ui.main.timer.TimerScreen
 
 @Composable
 fun MainApp(modifier: Modifier = Modifier) {
-
     val navController = rememberNavController()
 
     Scaffold(
@@ -38,10 +37,7 @@ fun MainApp(modifier: Modifier = Modifier) {
             composable(Screen.Calendar.route) { CalenderScreen() }
             composable(Screen.Profile.route) { ProfileScreen() }
         }
-
     }
-
-
 }
 
 

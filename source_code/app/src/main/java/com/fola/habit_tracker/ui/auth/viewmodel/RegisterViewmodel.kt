@@ -244,7 +244,6 @@ class RegisterViewmodel : ViewModel() {
     private fun verifiedEmail(user: FirebaseUser) {
         user.sendEmailVerification().addOnCompleteListener {
             if (it.isSuccessful) {
-                Log.d("SNACKBAR", "MESSAGE IS $snackbarEvent")
                 showSnackbar("Verification Email send check your mailbox!")
                 Log.d("signup", "verification email send")
             } else {

@@ -63,9 +63,9 @@ fun BottomNavigationBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 82.dp)
-            .clip(RoundedCornerShape(30, 30, 0, 0))
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .heightIn(min = 64.dp)
+            .clip(RoundedCornerShape(40, 40, 0, 0))
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
@@ -104,7 +104,7 @@ fun BottomNavigationItemView(
                         if (isSelected) MaterialTheme.colorScheme.primary else Color(0x00000000)
                     ),
                     shape = RoundedCornerShape(30),
-                    alpha = .35f
+                    alpha = .30f
                 )
                 .clickable {
                     if (navController.currentDestination?.route != screen.route) {

@@ -1,9 +1,10 @@
 package com.fola.habit_tracker.data.data_base
 
 import androidx.room.TypeConverter
+import java.time.LocalDate
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Date
-
 
 
 class Converters {
@@ -42,4 +43,17 @@ class Converters {
     fun toReminderTime(time: Int): LocalTime {
         return LocalTime.of(time / 100, time % 100)
     }
+
+    // Convert LocalDate to String
+    @TypeConverter
+    fun fromLocalDate(date: LocalDate?): String? {
+        return date?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    }
+
+    // Convert String to LocalDate
+    @TypeConverter
+    fun toLocalDate(dateString: String?): LocalDate? {
+        return dateString?.let { LocalDate.parse(it, DateTimeFormatter.ofPattern("yyyy-MM-dd")) }
+    }
+
 }

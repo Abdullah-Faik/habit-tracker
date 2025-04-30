@@ -2,6 +2,7 @@ package com.fola.habit_tracker.ui.main.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,12 +25,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fola.habit_tracker.ui.theme.AppTheme
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
 
 @Composable
-fun DateRow(modifier: Modifier = Modifier) {
+fun DateRow(modifier: Modifier = Modifier, onCardPress: (LocalDate) -> Unit = {}) {
 
     val listState = rememberLazyListState()
     val today = LocalDate.now()
@@ -52,9 +54,12 @@ fun DateRow(modifier: Modifier = Modifier) {
                 dayNumber = date.dayOfMonth.toString(),
                 dayName = date.dayOfWeek.getDisplayName(
                     TextStyle.SHORT_STANDALONE,
-                    Locale.getDefault()
+                    Locale.UK
                 ),
-                isCurrentDay = date == today
+                isCurrentDay = date == today,
+                onCardPress = {
+                    onCardPress(date)
+                }
 
             )
         }
@@ -66,12 +71,14 @@ fun DateDayCard(
     modifier: Modifier = Modifier,
     dayNumber: String = "",
     dayName: String = "",
-    isCurrentDay: Boolean = false
+    isCurrentDay: Boolean = false,
+    onCardPress: () -> Unit = {}
 ) {
     Box(
         Modifier
             .padding(4.dp)
             .clip(RoundedCornerShape(16.dp))
+            .clickable { onCardPress() }
             .border(
                 width = if (isCurrentDay) (1.5).dp else (-1).dp,
                 shape = RoundedCornerShape(16.dp),
@@ -107,8 +114,8 @@ fun DateDayCard(
 @Composable
 private fun DataRowPrev() {
     AppTheme {
-    DateRow()
-        }
+        DateRow()
+    }
 }
 
 @Preview

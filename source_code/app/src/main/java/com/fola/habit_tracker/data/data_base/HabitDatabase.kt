@@ -8,7 +8,7 @@ import com.fola.habit_tracker.data.data_base.daos.DayDao
 import com.fola.habit_tracker.data.data_base.daos.HabitsDao
 
 
-@Database(entities = [Day::class, Habit::class, Task::class, DailyHabits::class], version = 2)
+@Database(entities = [Day::class, Habit::class, DailyHabits::class], version = 2)
 @TypeConverters(Converters::class)
 abstract class HabitDataBase : RoomDatabase() {
 

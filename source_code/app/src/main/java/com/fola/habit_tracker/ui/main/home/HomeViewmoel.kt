@@ -7,31 +7,51 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fola.habit_tracker.HabitApplication
+import com.fola.habit_tracker.data.data_base.Day
+import com.fola.habit_tracker.data.data_base.DayWithHabits
 import com.fola.habit_tracker.data.data_base.Habit
 import com.fola.habit_tracker.data.repositry.DataBaseHabitsRepository
 import com.fola.habit_tracker.data.repositry.HabitsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.time.LocalDate
 
-open class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel() {
+class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel() {
 
-    private val _habits = MutableStateFlow<List<Habit>>(emptyList())
-    val habits: StateFlow<List<Habit>> = _habits.asStateFlow()
-
+    private val _dailyHabits = MutableStateFlow(DayWithHabits(Day(LocalDate.now()), emptyList()))
+    val habits: StateFlow<DayWithHabits> = _dailyHabits.asStateFlow()
 
     init {
-        getHabits()
+        getDayHabit()
     }
 
-    private fun getHabits() {
-        viewModelScope.launch {
-            habitsRepository.getAllHabits().collect {
-                _habits.value = it
+    fun getDayHabit(dayId: LocalDate = LocalDate.now()) {
+        viewModelScope.launch(Dispatchers.IO) {
+            habitsRepository.initNewDay(LocalDate.now())
+            habitsRepository.getDailyHabits(dayId).collect { dailyHabits ->
+                withContext(Dispatchers.Main) {
+                    _dailyHabits.value = dailyHabits
+                }
             }
         }
     }
+
+    fun addNewHabit(habit: Habit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            habitsRepository.addNewDailyHabit(habit)
+        }
+    }
+
+    fun removeDailyHabit(dayId: LocalDate, habitId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            habitsRepository.deleteHabit(dayId, habitId)
+        }
+    }
+
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
