@@ -1,4 +1,4 @@
-package com.fola.habit_tracker.ui.profileScreen
+package com.fola.habit_tracker.ui.main.profileScreen
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.StateFlow

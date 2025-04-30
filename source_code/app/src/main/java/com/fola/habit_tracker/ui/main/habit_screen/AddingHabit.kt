@@ -1,5 +1,6 @@
-package com.fola.habit_tracker.ui.task_screen
+package com.fola.habit_tracker.ui.main.habit_screen
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,8 +45,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.fola.habit_tracker.ui.components.interFont
+import com.fola.habit_tracker.ui.task_screen.TaskNavigation
 import com.fola.habit_tracker.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -249,7 +250,7 @@ fun AddingTaskLightPrev() {
     }
 }
 
-@Preview(showSystemUi = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Preview(showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun AddingTaskDarkPrev() {
     AppTheme {

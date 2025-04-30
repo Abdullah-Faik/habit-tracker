@@ -1,4 +1,4 @@
-package com.fola.habit_tracker.ui.profileScreen
+package com.fola.habit_tracker.ui.main.profileScreen
 
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.vector.ImageVector

@@ -1,4 +1,4 @@
-package com.fola.habit_tracker.ui.profileScreen
+package com.fola.habit_tracker.ui.main.profileScreen
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -56,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.fola.habit_tracker.ui.theme.AppTheme
 
@@ -68,7 +69,7 @@ import com.fola.habit_tracker.ui.theme.AppTheme
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
-    viewModel: ProfileViewModel
+    viewModel: ProfileViewModel = viewModel()
 ) {
     // Collect the user profile data (name, image) and notification state from the ViewModel as State.
     val userProfile by viewModel.userProfile.collectAsState()

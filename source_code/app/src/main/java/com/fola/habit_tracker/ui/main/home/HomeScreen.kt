@@ -51,6 +51,7 @@ fun HomeScreen(
                     .clip(RoundedCornerShape(50.dp))
                     .background(MaterialTheme.colorScheme.primary)
                     .size(64.dp)
+
             )
         }
     ) { paddingValues ->

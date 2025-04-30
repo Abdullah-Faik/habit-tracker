@@ -78,7 +78,7 @@ fun TasksCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (habit.repeatedType == RepeatedType.NONE) "Task" else "Habit",
+                        text = if (habit.repeatedType == RepeatedType.DAILY) "Task" else "Habit",
                         fontSize = 10.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
