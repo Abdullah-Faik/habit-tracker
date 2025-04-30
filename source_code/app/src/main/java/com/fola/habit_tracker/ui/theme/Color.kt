@@ -2,6 +2,8 @@ package com.fola.habit_tracker.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+
+
 val primaryLight = Color(0xFF006972)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFF9DF0FB)
@@ -18,7 +20,7 @@ val errorLight = Color(0xFFBA1A1A)
 val onErrorLight = Color(0xFFFFFFFF)
 val errorContainerLight = Color(0xFFFFDAD6)
 val onErrorContainerLight = Color(0xFF93000A)
-val backgroundLight = Color(0xFFFFFFFF)//Color(0xFFF5FAFB)
+val backgroundLight = Color(0xFFFFFFFF)
 val onBackgroundLight = Color(0xFF171D1D)
 val surfaceLight = Color(0xFFF5FAFB)
 val onSurfaceLight = Color(0xFF171D1D)
@@ -126,7 +128,7 @@ val errorDark = Color(0xFFFFB4AB)
 val onErrorDark = Color(0xFF690005)
 val errorContainerDark = Color(0xFF93000A)
 val onErrorContainerDark = Color(0xFFFFDAD6)
-val backgroundDark = Color(0xff121212) //Color(0xFF0E1415)
+val backgroundDark = Color(0xff121212)
 val onBackgroundDark = Color(0xFFDEE4E4)
 val surfaceDark = Color(0xFF0E1415)
 val onSurfaceDark = Color(0xFFDEE4E4)
@@ -217,10 +219,3 @@ val surfaceContainerLowDarkHighContrast = Color(0xFF1B2122)
 val surfaceContainerDarkHighContrast = Color(0xFF2B3132)
 val surfaceContainerHighDarkHighContrast = Color(0xFF363C3D)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF424849)
-
-
-
-
-
-
-

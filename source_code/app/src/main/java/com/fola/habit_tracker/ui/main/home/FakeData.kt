@@ -9,7 +9,7 @@ import java.time.LocalTime
 
 
 class FakeHabitsRepository : HabitsRepository {
-    override suspend fun getAllHabits(): Flow<List<Habit>> {
+    override suspend fun getAllHabits(habit: Habit): Flow<List<Habit>> {
         return flowOf(
             listOf(
                 Habit(id = 1, title = "Drink Water", repeatedType = RepeatedType.DAILY),
