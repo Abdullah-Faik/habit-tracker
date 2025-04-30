@@ -1,6 +1,7 @@
 package com.fola.habit_tracker.ui.main.habit_screen
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -45,8 +46,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.fola.habit_tracker.R
 import com.fola.habit_tracker.ui.components.interFont
+import com.fola.habit_tracker.ui.task_screen.TaskNavigation
 import com.fola.habit_tracker.ui.theme.AppTheme
-import android.util.Log // CHANGED: Added import for error logging
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,7 +62,7 @@ fun HabitScreen(navController: NavController) {
                 ),
                 title = {
                     Text(
-                        text = "Tasks",
+                        text = "Habits",
                         fontWeight = FontWeight.Bold,
                         fontFamily = interFont,
                         color = MaterialTheme.colorScheme.onSurface
@@ -112,7 +113,7 @@ fun HabitScreen(navController: NavController) {
                             onClick = { selectedTab = 0 },
                             text = {
                                 Text(
-                                    text = "Single Tasks",
+                                    text = "Single Habits",
                                     fontFamily = interFont,
                                     fontWeight = FontWeight.Bold,
                                 )
@@ -125,7 +126,7 @@ fun HabitScreen(navController: NavController) {
                             onClick = { selectedTab = 1 },
                             text = {
                                 Text(
-                                    text = "Recurring Tasks",
+                                    text = "Recurring Habits",
                                     fontFamily = interFont,
                                     fontWeight = FontWeight.Bold,
                                 )
@@ -146,7 +147,7 @@ fun HabitScreen(navController: NavController) {
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.checklist),
-                            contentDescription = "no task added",
+                            contentDescription = "no habit added",
                             modifier = Modifier
                                 .size(150.dp)
                                 .alpha(0.6f),
@@ -159,7 +160,7 @@ fun HabitScreen(navController: NavController) {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No tasks",
+                            text = "No habits",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -170,7 +171,7 @@ fun HabitScreen(navController: NavController) {
                     }
                     Spacer(modifier = Modifier.size(10.dp))
                     Text(
-                        text = "There is no upcoming tasks",
+                        text = "There is no upcoming habits",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Gray,
@@ -188,9 +189,9 @@ fun HabitScreen(navController: NavController) {
                     .align(Alignment.BottomEnd),
                 onClick = {
                     try { // CHANGED: Added try-catch to handle navigation errors
-                        navController.navigate("addingTask") // Navigate to adding task
+                        navController.navigate("addingHabit") // Navigate to adding task
                     } catch (e: IllegalArgumentException) { // CHANGED: Log error to prevent crash
-                        Log.e("NavigationError", "Failed to navigate to addingTask: ${e.message}")
+                        Log.e("NavigationError", "Failed to navigate to addingHabit: ${e.message}")
                     }
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -211,7 +212,7 @@ fun HabitScreen(navController: NavController) {
 @Composable
 fun LightTasksPrev() {
     AppTheme {
-        HabitScreen(navController = rememberNavController())// CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
+        TaskNavigation()// CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
     }
 }
 
@@ -219,6 +220,6 @@ fun LightTasksPrev() {
 @Composable
 private fun DarkTasksPrev() {
     AppTheme {
-        HabitScreen(navController = rememberNavController()) // CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
+        TaskNavigation() // CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
     }
 }

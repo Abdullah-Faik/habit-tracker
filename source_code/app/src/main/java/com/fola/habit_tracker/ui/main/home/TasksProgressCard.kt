@@ -29,7 +29,9 @@ fun ProgressCard(modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .shadow(8.dp)
-            .background(color = MaterialTheme.colorScheme.surfaceContainerHighest),
+            .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
+
+        ,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -55,16 +57,18 @@ fun ProgressCard(modifier: Modifier = Modifier) {
         }
         Column {
             Text(
-                text = "You Are On Fire  \uD83D\uDD25",
+                "You Are On Fire  \uD83D\uDD25",
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "1 of 5 Completed",
+                "1 of 5 Completed",
                 color = MaterialTheme.colorScheme.primary
             )
         }
     }
+
 }
+
 
 @Preview(showBackground = true)
 @Composable
