@@ -1,4 +1,4 @@
-package com.fola.habit_tracker.ui.profileScreen
+package com.fola.habit_tracker.ui.main.profileScreen
 
 import com.fola.habit_tracker.R
 import kotlinx.coroutines.flow.Flow

@@ -22,10 +22,10 @@
       <SelectionState runConfigName="LightTasksPrev">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="AddingTaskLightPrev">
+      <SelectionState runConfigName="HomeDarkPrev">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="HomeDarkPrev">
+      <SelectionState runConfigName="HomePrev">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

@@ -1,5 +1,6 @@
-package com.fola.habit_tracker.ui.task_screen
+package com.fola.habit_tracker.ui.main.habit_screen
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -49,7 +50,7 @@ import android.util.Log // CHANGED: Added import for error logging
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SingleTaskScreen(navController: NavController) {
+fun HabitScreen(navController: NavController) {
     val applicationContext = LocalContext.current
 
     Scaffold(
@@ -210,14 +211,14 @@ fun SingleTaskScreen(navController: NavController) {
 @Composable
 fun LightTasksPrev() {
     AppTheme {
-        TaskNavigation() // CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
+        HabitScreen(navController = rememberNavController())// CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
     }
 }
 
-@Preview(showSystemUi = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Preview(showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun DarkTasksPrev() {
     AppTheme {
-        TaskNavigation() // CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
+        HabitScreen(navController = rememberNavController()) // CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
     }
 }

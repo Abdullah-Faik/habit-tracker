@@ -9,15 +9,8 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.fola.habit_tracker.ui.profileScreen.ProfileRepository
-import com.fola.habit_tracker.ui.profileScreen.ProfileScreen
-import com.fola.habit_tracker.ui.profileScreen.ProfileViewModel
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
