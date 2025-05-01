@@ -6,6 +6,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -13,8 +15,12 @@ import androidx.navigation.compose.rememberNavController
 import com.fola.habit_tracker.ui.main.calender.CalenderScreen
 import com.fola.habit_tracker.ui.main.habit_screen.HabitScreen
 import com.fola.habit_tracker.ui.main.home.HomeScreen
+import com.fola.habit_tracker.ui.main.profileScreen.LocalProfileRepository
 import com.fola.habit_tracker.ui.main.profileScreen.ProfileScreen
+import com.fola.habit_tracker.ui.main.profileScreen.ProfileViewModel
+import com.fola.habit_tracker.ui.main.profileScreen.RemoteProfileRepository
 import com.fola.habit_tracker.ui.main.timer_screen.TimerScreen
+import com.fola.habit_tracker.ui.theme.AppTheme
 
 @Composable
 fun MainApp(modifier: Modifier = Modifier) {
@@ -35,7 +41,18 @@ fun MainApp(modifier: Modifier = Modifier) {
             composable(Screen.Habit.route) { HabitScreen(navController) }
             composable(Screen.Timer.route) { TimerScreen() }
             composable(Screen.Calendar.route) { CalenderScreen() }
-            composable(Screen.Profile.route) { ProfileScreen(viewModel = viewModel()) } // Updated to not pass viewModel
+
+            composable(Screen.Profile.route) {
+                val viewModel: ProfileViewModel = viewModel(
+                    factory = object : ViewModelProvider.Factory {
+                        @Suppress("UNCHECKED_CAST")
+                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                            return ProfileViewModel(LocalProfileRepository(), RemoteProfileRepository()) as T
+                        }
+                    }
+                )
+                ProfileScreen(viewModel = viewModel)
+            }
         }
     }
 }
@@ -43,5 +60,7 @@ fun MainApp(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 private fun MainAppPrev() {
-    MainApp()
+    AppTheme {
+        MainApp()
+    }
 }
