@@ -16,7 +16,6 @@ import com.fola.habit_tracker.ui.main.home.HomeScreen
 import com.fola.habit_tracker.ui.main.profileScreen.ProfileScreen
 import com.fola.habit_tracker.ui.main.timer_screen.TimerScreen
 
-
 @Composable
 fun MainApp(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
@@ -26,7 +25,7 @@ fun MainApp(modifier: Modifier = Modifier) {
         bottomBar = { BottomNavigationBar(
             navController = navController
         ) }
-    ) {innerPadding ->
+    ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
@@ -36,17 +35,13 @@ fun MainApp(modifier: Modifier = Modifier) {
             composable(Screen.Habit.route) { HabitScreen(navController) }
             composable(Screen.Timer.route) { TimerScreen() }
             composable(Screen.Calendar.route) { CalenderScreen() }
-            composable(Screen.Profile.route) { ProfileScreen() }
-
+            composable(Screen.Profile.route) { ProfileScreen(viewModel = viewModel()) } // Updated to not pass viewModel
         }
     }
 }
-
 
 @Preview
 @Composable
 private fun MainAppPrev() {
     MainApp()
 }
-
-

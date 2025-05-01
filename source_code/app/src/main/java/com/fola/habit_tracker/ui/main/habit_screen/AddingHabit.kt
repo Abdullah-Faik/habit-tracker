@@ -47,7 +47,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.fola.habit_tracker.ui.components.interFont
-import com.fola.habit_tracker.ui.task_screen.TaskNavigation
 import com.fola.habit_tracker.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -215,7 +214,7 @@ fun AddingHabitScreen(navController: NavController) {
             ) {
                 Box(modifier = Modifier, contentAlignment = Alignment.Center) {
                     TextButton(onClick = {
-                        navController.popBackStack() // Pop back to TaskScreen
+                        navController.popBackStack() // Pop back to HabitMainContent
                     }) {
                         Text(
                             "Cancel",
@@ -228,7 +227,7 @@ fun AddingHabitScreen(navController: NavController) {
                 Box(modifier = Modifier, contentAlignment = Alignment.Center) {
                     TextButton(onClick = {
                         // TODO: Save task logic here
-                        navController.popBackStack() // Pop back to TaskScreen
+                        navController.popBackStack() // Pop back to HabitMainContent
                     }) {
                         Text(
                             "Confirm",
@@ -247,7 +246,7 @@ fun AddingHabitScreen(navController: NavController) {
 @Composable
 fun AddingTaskLightPrev() {
     AppTheme {
-        AddingHabitScreen(navController = rememberNavController()) // CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
+        AddingHabitScreen(navController = rememberNavController())
     }
 }
 
@@ -255,6 +254,6 @@ fun AddingTaskLightPrev() {
 @Composable
 private fun AddingTaskDarkPrev() {
     AppTheme {
-        AddingHabitScreen(navController = rememberNavController()) // CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
+        AddingHabitScreen(navController = rememberNavController())
     }
 }

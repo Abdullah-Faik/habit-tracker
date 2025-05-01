@@ -69,7 +69,7 @@ import com.fola.habit_tracker.ui.theme.AppTheme
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel
 ) {
     // Collect the user profile data (name, image) and notification state from the ViewModel as State.
     val userProfile by viewModel.userProfile.collectAsState()
