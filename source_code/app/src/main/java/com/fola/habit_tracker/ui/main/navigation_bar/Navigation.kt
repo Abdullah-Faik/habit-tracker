@@ -51,7 +51,7 @@ fun MainApp(modifier: Modifier = Modifier) {
                         }
                     }
                 )
-                ProfileScreen(viewModel = viewModel)
+                ProfileScreen()
             }
         }
     }

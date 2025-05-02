@@ -10,14 +10,14 @@ class LocalProfileRepository {
         UserProfile(
             name = "Mostafa Ali",
             profileImageUri = "",
-            notificationsEnabled = true,
+            notificationsEnabled = false,
             darkTheme = false
         )
     )
     val userProfile = _userProfile.asStateFlow()
 
     // Local: تفعيل الإشعارات
-    private val _isNotificationsEnabled = MutableStateFlow(true)
+    private val _isNotificationsEnabled = MutableStateFlow(false)
     val isNotificationsEnabled = _isNotificationsEnabled.asStateFlow()
 
     // Local: تفعيل الوضع الليلي

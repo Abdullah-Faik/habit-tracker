@@ -126,12 +126,11 @@ open class ProfileViewModel(
         }
     }
 
-    // 🟡 إعادة تعيين البيانات محليًا فقط (يمكنك توسيعها لحذف من Firebase أيضًا)
+
     fun resetData() {
         localRepo.updateName("")
         localRepo.updateProfileImage("")
         localRepo.toggleNotifications(true)
-        // إعادة الوضع الليلي للوضع الافتراضي
         if (isDarkTheme.value) localRepo.toggleTheme()
         syncProfileToFirebase()
     }
