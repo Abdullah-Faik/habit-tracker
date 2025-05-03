@@ -9,7 +9,7 @@ class LocalProfileRepository {
 
     private val _userProfile = MutableStateFlow(
         UserProfile(
-            name = "Mostafa Ali",
+            name = "",
             profileImageUri = "",
             notificationsEnabled = false,
             darkTheme = false

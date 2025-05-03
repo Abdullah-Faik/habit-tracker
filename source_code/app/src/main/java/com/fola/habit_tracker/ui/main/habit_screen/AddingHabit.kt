@@ -22,8 +22,8 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -88,7 +88,7 @@ fun AddingHabitScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
             Box {
                 Spacer(modifier = Modifier.height(16.dp))
-                Divider(
+                HorizontalDivider(
                     color = Color(0xff333232),
                     thickness = 1.dp,
                     modifier = Modifier.fillMaxWidth()
@@ -123,7 +123,7 @@ fun AddingHabitScreen(navController: NavController) {
             }
             Box {
                 Spacer(modifier = Modifier.height(16.dp))
-                Divider(
+                HorizontalDivider(
                     color = Color(0xff333232),
                     thickness = 1.dp,
                     modifier = Modifier.fillMaxWidth()
@@ -162,7 +162,7 @@ fun AddingHabitScreen(navController: NavController) {
             // Note section
             Box {
                 Spacer(modifier = Modifier.height(16.dp))
-                Divider(
+                HorizontalDivider(
                     color = Color(0xff333232),
                     thickness = 1.dp,
                     modifier = Modifier.fillMaxWidth()
@@ -202,7 +202,7 @@ fun AddingHabitScreen(navController: NavController) {
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            Divider(
+            HorizontalDivider(
                 color = Color.Gray,
                 thickness = 1.dp,
                 modifier = Modifier.padding(vertical = 8.dp)

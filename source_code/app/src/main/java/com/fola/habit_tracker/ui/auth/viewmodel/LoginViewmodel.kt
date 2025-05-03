@@ -151,21 +151,30 @@ class LoginViewmodel : ViewModel() {
 
     }
 
-    fun signIn() {
+    fun signIn(onSuccess: () -> Unit) {
         if (validateFields()) {
             val email = _loginScreenState.value.email.text
             val password = _loginScreenState.value.password.text
             val auth = Firebase.auth
-            auth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener {
-                    if (it.isSuccessful)
-                        showSnackbar("Login Successfully")
-                    else
-                        showSnackbar(it.exception?.message.toString())
 
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val user = auth.currentUser
+                        if (user != null && user.isEmailVerified) {
+                            showSnackbar("Login Successfully")
+                            onSuccess()
+                        } else {
+                            showSnackbar("Please verify your email address.")
+                        }
+                    } else {
+                        showSnackbar(task.exception?.message.toString())
+                    }
                 }
         }
     }
+
+
     private fun showSnackbar(message: String) {
         viewModelScope.launch {
             _snackbarEvent.send(message)

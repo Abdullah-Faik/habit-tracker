@@ -12,7 +12,7 @@ class RemoteProfileRepository {
     private val storage = FirebaseStorage.getInstance().reference
     private val auth = FirebaseAuth.getInstance()
     private val userId = auth.currentUser?.uid ?: "default_user"
-    private val defaultProfileImageUri = "https://firebasestorage.googleapis.com/.../default_profile.jpg" // استبدل بالرابط الفعلي
+    private val defaultProfileImageUri = "res/drawable/def.png" // استبدل بالرابط الفعلي
 
     fun loadUserProfile(onSuccess: (UserProfile) -> Unit, onError: (Exception) -> Unit) {
         Log.d(TAG, "loadUserProfile: userId=$userId")

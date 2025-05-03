@@ -2,6 +2,7 @@ package com.fola.habit_tracker.ui.auth
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -9,7 +10,7 @@ import com.fola.habit_tracker.ui.auth.viewmodel.AuthScreen
 
 
 @Composable
-fun AuthModule(modifier: Modifier = Modifier) {
+fun AuthNavigation(modifier: Modifier = Modifier, onAuthSuccess: () -> Unit) {
 
     val navController = rememberNavController()
 
@@ -30,7 +31,11 @@ fun AuthModule(modifier: Modifier = Modifier) {
                     navController.navigate(AuthScreen.REGISTER.name) {
                         launchSingleTop = true
                     }
+                },
+                onLoginSuccess = {
+                    onAuthSuccess() // ✅ هنا ننتقل إلى MainApp بعد نجاح تسجيل الدخول
                 }
+
             )
 
         }
@@ -58,7 +63,6 @@ fun AuthModule(modifier: Modifier = Modifier) {
             ResetPasswordScreen(
                 onBackButton = {
                     navController.popBackStack(AuthScreen.LOGIN.name, inclusive = false)
-
                 }
             )
         }
@@ -67,3 +71,8 @@ fun AuthModule(modifier: Modifier = Modifier) {
 
 }
 
+@Preview
+@Composable
+fun Preiv() {
+    AuthNavigation(onAuthSuccess = {})
+}
