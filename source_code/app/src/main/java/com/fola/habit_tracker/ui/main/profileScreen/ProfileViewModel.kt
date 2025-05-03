@@ -1,6 +1,7 @@
 package com.fola.habit_tracker.ui.main.profileScreen
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.StateFlow
@@ -10,11 +11,9 @@ open class ProfileViewModel(
     private val localRepo: LocalProfileRepository,
     private val remoteRepo: RemoteProfileRepository
 ) : ViewModel() {
+    private val TAG = "ProfileViewModel"
 
-    // ✅ المراقبة المحلية لحالة الملف الشخصي (اسم - صورة - إعدادات)
     open val userProfile: StateFlow<UserProfile> = localRepo.userProfile
-
-    // ✅ الإشعارات والوضع الليلي مراقَبة محليًا
     open val isNotificationsEnabled: StateFlow<Boolean> = localRepo.isNotificationsEnabled
     open val isDarkTheme: StateFlow<Boolean> = localRepo.isDarkTheme
 
@@ -22,12 +21,12 @@ open class ProfileViewModel(
         loadUserProfileFromFirebase()
     }
 
-    // ☁️ تحميل البيانات من Firestore إلى LocalRepository عند بداية التشغيل
     private fun loadUserProfileFromFirebase() {
+        Log.d(TAG, "loadUserProfileFromFirebase")
         viewModelScope.launch {
             remoteRepo.loadUserProfile(
                 onSuccess = { remoteProfile ->
-                    // ✅ تحديث البيانات محليًا من Firebase
+                    Log.i(TAG, "loadUserProfileFromFirebase: success")
                     localRepo.updateName(remoteProfile.name)
                     localRepo.updateProfileImage(remoteProfile.profileImageUri)
                     localRepo.toggleNotifications(remoteProfile.notificationsEnabled)
@@ -35,105 +34,104 @@ open class ProfileViewModel(
                         localRepo.toggleTheme()
                     }
                 },
-                onError = {
-                    // ⚠️ يمكنك عرض رسالة خطأ هنا أو الاحتفاظ بالبيانات الحالية
+                onError = { e ->
+                    Log.e(TAG, "loadUserProfileFromFirebase: error=${e.message}")
                 }
             )
         }
     }
 
-
-    // for editing user profile data
-    fun editProfileDetails(){
-
+    fun editProfileDetails() {
+        Log.d(TAG, "editProfileDetails")
+        Log.i(TAG, "editProfileDetails: initiated")
     }
-    // 🟡 عند تعديل اسم المستخدم، يحدث محليًا ويتم مزامنته مع Firebase
+
     fun onNameChanged(newName: String) {
+        Log.d(TAG, "onNameChanged: name=$newName")
         localRepo.updateName(newName)
         syncProfileToFirebase()
+        Log.i(TAG, "onNameChanged: success")
     }
 
-    // 🟡 تحديث إعداد الإشعارات محليًا + حفظه في Firebase
     fun toggleNotifications(enabled: Boolean) {
+        Log.d(TAG, "toggleNotifications: enabled=$enabled")
         localRepo.toggleNotifications(enabled)
         syncProfileToFirebase()
+        Log.i(TAG, "toggleNotifications: success")
     }
 
-    // 🟡 تبديل الوضع الليلي وتحديثه في Firestore
     fun toggleTheme() {
+        Log.d(TAG, "toggleTheme")
         localRepo.toggleTheme()
         syncProfileToFirebase()
+        Log.i(TAG, "toggleTheme: success")
     }
 
-    // ☁️ رفع صورة جديدة إلى Firebase Storage ثم تحديث الرابط محليًا + Firestore
     fun onImageSelected(uri: Uri) {
+        Log.d(TAG, "onImageSelected: uri=$uri")
         viewModelScope.launch {
             remoteRepo.uploadProfileImage(
                 uri,
                 onSuccess = { downloadUrl ->
+                    Log.i(TAG, "onImageSelected: success")
                     localRepo.updateProfileImage(downloadUrl)
                     syncProfileToFirebase()
                 },
-                onError = {
-                    // ⚠️ عرض رسالة فشل رفع الصورة
+                onError = { e ->
+                    Log.e(TAG, "onImageSelected: error=${e.message}")
                 }
             )
         }
     }
 
-    // ☁️ مزامنة البيانات الحالية مع Firestore
     private fun syncProfileToFirebase() {
+        Log.d(TAG, "syncProfileToFirebase")
         viewModelScope.launch {
             val profile = localRepo.getCurrentProfile()
             remoteRepo.saveUserProfile(
                 profile,
-                onSuccess = { /* ✅ تم الحفظ بنجاح */ },
-                onError = { /* ⚠️ حدث خطأ أثناء الحفظ */ }
+                onSuccess = { Log.i(TAG, "syncProfileToFirebase: success") },
+                onError = { e -> Log.e(TAG, "syncProfileToFirebase: error=${e.message}") }
             )
         }
     }
 
-    // ☁️ تغيير كلمة المرور عبر Firebase Auth
     fun changePassword(newPassword: String) {
+        Log.d(TAG, "changePassword")
         viewModelScope.launch {
             remoteRepo.changePassword(
                 newPassword,
-                onSuccess = { /* ✅ تم تغيير كلمة المرور */ },
-                onError = { /* ⚠️ فشل تغيير كلمة المرور */ }
+                onSuccess = { Log.i(TAG, "changePassword: success") },
+                onError = { e -> Log.e(TAG, "changePassword: error=${e.message}") }
             )
         }
     }
 
-    // ☁️ تسجيل الخروج باستخدام Firebase Auth
     fun logout() {
+        Log.d(TAG, "logout")
         viewModelScope.launch {
             remoteRepo.logout()
-            // يمكنك التنقل إلى شاشة تسجيل الدخول بعد ذلك
+            Log.i(TAG, "logout: success")
         }
     }
 
-    // ☁️ حذف الحساب تمامًا من Firebase Auth و Firestore
     fun deleteAccount() {
+        Log.d(TAG, "deleteAccount")
         viewModelScope.launch {
             remoteRepo.deleteAccount(
-                onSuccess = {
-                    // ✅ حذف الحساب بنجاح، يمكن التنقل إلى شاشة البداية
-                },
-                onError = {
-                    // ⚠️ فشل في حذف الحساب
-                }
+                onSuccess = { Log.i(TAG, "deleteAccount: success") },
+                onError = { e -> Log.e(TAG, "deleteAccount: error=${e.message}") }
             )
         }
     }
 
-
     fun resetData() {
+        Log.d(TAG, "resetData")
         localRepo.updateName("")
         localRepo.updateProfileImage("")
         localRepo.toggleNotifications(true)
         if (isDarkTheme.value) localRepo.toggleTheme()
         syncProfileToFirebase()
+        Log.i(TAG, "resetData: success")
     }
 }
-
-

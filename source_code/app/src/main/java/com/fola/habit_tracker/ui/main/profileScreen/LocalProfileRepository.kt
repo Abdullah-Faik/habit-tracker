@@ -1,11 +1,12 @@
 package com.fola.habit_tracker.ui.main.profileScreen
 
+import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class LocalProfileRepository {
+    private val TAG = "LocalProfileRepo"
 
-    // Local: الحالة الحالية للمستخدم
     private val _userProfile = MutableStateFlow(
         UserProfile(
             name = "Mostafa Ali",
@@ -16,36 +17,42 @@ class LocalProfileRepository {
     )
     val userProfile = _userProfile.asStateFlow()
 
-    // Local: تفعيل الإشعارات
     private val _isNotificationsEnabled = MutableStateFlow(false)
     val isNotificationsEnabled = _isNotificationsEnabled.asStateFlow()
 
-    // Local: تفعيل الوضع الليلي
     private val _isDarkTheme = MutableStateFlow(false)
     val isDarkTheme = _isDarkTheme.asStateFlow()
 
-    // Local: تحديث الاسم داخل التطبيق
     fun updateName(name: String) {
+        Log.d(TAG, "updateName: name=$name")
         _userProfile.value = _userProfile.value.copy(name = name)
+        Log.i(TAG, "updateName: success")
     }
 
-    // Local: تحديث رابط الصورة داخل التطبيق
     fun updateProfileImage(uri: String) {
+        Log.d(TAG, "updateProfileImage: uri=$uri")
         _userProfile.value = _userProfile.value.copy(profileImageUri = uri)
+        Log.i(TAG, "updateProfileImage: success")
     }
 
-    // Local: تفعيل/تعطيل الإشعارات داخل التطبيق
     fun toggleNotifications(enabled: Boolean) {
+        Log.d(TAG, "toggleNotifications: enabled=$enabled")
         _isNotificationsEnabled.value = enabled
         _userProfile.value = _userProfile.value.copy(notificationsEnabled = enabled)
+        Log.i(TAG, "toggleNotifications: success")
     }
 
-    // Local: تفعيل/إيقاف الوضع الليلي داخل التطبيق
     fun toggleTheme() {
+        Log.d(TAG, "toggleTheme: current=${_isDarkTheme.value}")
         _isDarkTheme.value = !_isDarkTheme.value
         _userProfile.value = _userProfile.value.copy(darkTheme = _isDarkTheme.value)
+        Log.i(TAG, "toggleTheme: success")
     }
 
-    // Local: الحصول على النسخة الحالية من بيانات المستخدم
-    fun getCurrentProfile(): UserProfile = _userProfile.value
+    fun getCurrentProfile(): UserProfile {
+        Log.d(TAG, "getCurrentProfile")
+        val profile = _userProfile.value
+        Log.i(TAG, "getCurrentProfile: success")
+        return profile
+    }
 }
