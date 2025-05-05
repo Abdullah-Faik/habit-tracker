@@ -1,35 +1,41 @@
 package com.fola.habit_tracker.data.data_base
 
-import androidx.annotation.DrawableRes
+import android.content.ClipDescription
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.Junction
 import androidx.room.PrimaryKey
 import androidx.room.Relation
+import com.fola.habit_tracker.R
+import com.fola.habit_tracker.ui.theme.secondaryContainerLight
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import java.util.Date
 
 
 enum class RepeatedType {
-    TASK, DAILY, WEEKLY, MONTHLY, YEARLY
+    ONCE, DAILY, WEEKLY, MONTHLY, YEARLY
 }
-
 
 @Entity(tableName = "habit")
 data class Habit(
     @ColumnInfo(name = "habit_id") @PrimaryKey val id: Long = Date().time,
-    @ColumnInfo(name = "title") val title: String,
+    @ColumnInfo(name = "title") var title: String,
     @ColumnInfo(name = "description") val description: String = "",
-    @ColumnInfo(name = "icon_path") @DrawableRes val iconPath: Int = 0,
-    @ColumnInfo(name = "habit_duration") val habitDuration: Int = 0,
-    @ColumnInfo(name = "reminder_time") val reminderTime: LocalTime = LocalTime.of(12, 0),
+    @ColumnInfo(name = "icon") val icon: Int = R.drawable.programming,
+    @ColumnInfo(name = "icon_description") val iconDescription: String = "Coding",
+    @ColumnInfo(name = "color") val color: Long = 0xFF03A9F5,
+    @ColumnInfo(name = "color_name") val colorName: String = "Light Blue",
     @ColumnInfo(name = "repeated_type") val repeatedType: RepeatedType = RepeatedType.DAILY,
-    @ColumnInfo(name = "repeats_per_day") val repeatPerDay: Int = 1,
+    @ColumnInfo(name = "days") val daya: List<Int> = emptyList(),
+    @ColumnInfo(name = "start_date") val startDate: LocalDate = LocalDate.now(),
+    @ColumnInfo(name = "end_date") val endDate: LocalDate = LocalDate.MAX,
+    @ColumnInfo(name = "start_time") val startTime: LocalTime = LocalTime.now(),
+    @ColumnInfo(name = "times_of_unit") val timesOfUnit: Int = 1,
+    @ColumnInfo(name = "unit") val unit: String = "",
+    @ColumnInfo(name = "is_inactive") val isInactive: Int = 0,
     @ColumnInfo(name = "is_removed") val isRemoved: Int = 0,
     @ColumnInfo(name = "remove_date") val removedDate: Date? = null,
 )
