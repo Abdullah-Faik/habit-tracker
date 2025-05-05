@@ -3,7 +3,8 @@ package com.fola.habit_tracker.ui.main.profileScreen
 
 data class UserProfile(
     val name: String = "",
+    val Password: String = "",
     val profileImageUri: String = "",
-    val notificationsEnabled: Boolean = true,
+    val notificationsEnabled: Boolean = false,
     val darkTheme: Boolean = false
 )

@@ -12,7 +12,7 @@ class RemoteProfileRepository {
     private val storage = FirebaseStorage.getInstance().reference
     private val auth = FirebaseAuth.getInstance()
     private val userId = auth.currentUser?.uid ?: "default_user"
-    private val defaultProfileImageUri = "res/drawable/def.png" // استبدل بالرابط الفعلي
+    private val defaultProfileImageUri = "res/drawable/def.png"
 
     fun loadUserProfile(onSuccess: (UserProfile) -> Unit, onError: (Exception) -> Unit) {
         Log.d(TAG, "loadUserProfile: userId=$userId")
@@ -27,7 +27,7 @@ class RemoteProfileRepository {
                 } else {
                     Log.d(TAG, "loadUserProfile: creating default profile")
                     val defaultProfile = UserProfile(
-                        name = auth.currentUser?.displayName ?: "مستخدم جديد",
+                        name = auth.currentUser?.displayName ?: "Guest",
                         profileImageUri = defaultProfileImageUri,
                         notificationsEnabled = true,
                         darkTheme = false

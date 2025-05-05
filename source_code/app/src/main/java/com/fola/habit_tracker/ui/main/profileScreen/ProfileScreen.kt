@@ -1,21 +1,51 @@
 package com.fola.habit_tracker.ui.main.profileScreen
 
-import android.net.Uri
-import com.fola.habit_tracker.R
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,89 +59,197 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import coil.size.Size
+import com.fola.habit_tracker.R
 import com.fola.habit_tracker.ui.theme.AppTheme
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
-    viewModel: ProfileViewModel
+    viewModel: ProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-    val userProfile by viewModel.userProfile.collectAsState()
-    val isDarkTheme by viewModel.isDarkTheme.collectAsState()
-    val isNotificationsEnabled by viewModel.isNotificationsEnabled.collectAsState()
-    var localDarkTheme by remember { mutableStateOf(isDarkTheme) }
+    val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
+    val isNotificationsEnabled by viewModel.isNotificationsEnabled.collectAsStateWithLifecycle()
+    val isDarkTheme by viewModel.isDarkTheme.collectAsStateWithLifecycle()
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showResetDialog by remember { mutableStateOf(false) }
+    var showEditProfileDialog by remember { mutableStateOf(false) }
+    var showChangePasswordDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
-    AppTheme(darkTheme = localDarkTheme) {
+    AppTheme(darkTheme = isDarkTheme) {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background
         ) { paddingValues ->
-            Box(
+            Column(
                 modifier = modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.TopCenter
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Profile Card
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            1.dp,
+                            Brush.linearGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.secondary
+                                )
+                            ),
+                            RoundedCornerShape(16.dp)
+                        ),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            ProfilePicture(userProfile.profileImageUri) { uri ->
-                                viewModel.onImageSelected(uri)
-                            }
-                            Spacer(modifier = Modifier.padding(12.dp))
+                        ProfilePicture()
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
                             Text(
                                 text = userProfile.name,
-                                fontSize = 28.sp,
+                                fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
+                            Text(
+                                text = FirebaseAuth.getInstance().currentUser?.email ?: "No email",
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Divider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-                    )
+                Divider(
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                    thickness = 1.dp
+                )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
+                // Settings Menu
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
                     SettingsMenu(
                         onItemClick = { item ->
                             when (item) {
-                                "Edit Profile Details" -> viewModel.editProfileDetails()
-                                "Change Password" -> viewModel.changePassword("new-password")
-                                "Logout" -> viewModel.logout()
+                                "Dark Theme" -> viewModel.toggleTheme()
                                 "Notifications" -> viewModel.toggleNotifications(!isNotificationsEnabled)
-                                "Dark Theme" -> {
-                                    localDarkTheme = !localDarkTheme
-                                    viewModel.toggleTheme()
-                                }
-                                "Reset Data" -> viewModel.resetData()
-                                "Delete Account" -> viewModel.deleteAccount()
+                                "Logout" -> showLogoutDialog = true
+                                "Delete Account" -> showDeleteDialog = true
+                                "Reset Data" -> showResetDialog = true
+                                "Edit Profile Details" -> showEditProfileDialog = true
+                                "Change Password" -> showChangePasswordDialog = true
                             }
                         },
-                        isDarkTheme = localDarkTheme,
+                        isDarkTheme = isDarkTheme,
                         isNotificationsEnabled = isNotificationsEnabled
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Confirmation Dialogs
+                if (showLogoutDialog) {
+                    ConfirmationDialog(
+                        title = "Confirm Logout",
+                        message = "Are you sure you want to log out?",
+                        onConfirm = {
+                            viewModel.logout()
+                            showLogoutDialog = false
+                        },
+                        onDismiss = { showLogoutDialog = false }
+                    )
+                }
+
+                if (showDeleteDialog) {
+                    ConfirmationDialog(
+                        title = "Confirm Delete Account",
+                        message = "This action cannot be undone. Are you sure you want to delete your account?",
+                        onConfirm = {
+                            viewModel.deleteAccount()
+                            showDeleteDialog = false
+                        },
+                        onDismiss = { showDeleteDialog = false },
+                        confirmButtonColor = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                if (showResetDialog) {
+                    ConfirmationDialog(
+                        title = "Confirm Reset Data",
+                        message = "This will clear all your habit data. Are you sure you want to proceed?",
+                        onConfirm = {
+                            viewModel.resetData()
+                            showResetDialog = false
+                        },
+                        onDismiss = { showResetDialog = false },
+                        confirmButtonColor = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                if (showEditProfileDialog) {
+                    EditProfileDialog(
+                        currentName = userProfile.name,
+                        currentEmail = FirebaseAuth.getInstance().currentUser?.email ?: "",
+                        onConfirm = { newName, newEmail ->
+                            viewModel.onNameChanged(newName)
+                            viewModel.updateEmail(newEmail)
+                            showEditProfileDialog = false
+                        },
+                        onDismiss = { showEditProfileDialog = false }
+                    )
+                }
+
+                if (showChangePasswordDialog) {
+                    ChangePasswordDialog(
+                        onConfirm = { oldPassword, newPassword ->
+                            viewModel.changePasswordWithVerification(
+                                context = context,
+                                oldPassword = oldPassword,
+                                newPassword = newPassword,
+                                onSuccess = { showChangePasswordDialog = false },
+                                onError = { exception ->
+                                    val errorMessage = when (exception) {
+                                        is FirebaseAuthInvalidCredentialsException -> "Incorrect old password"
+                                        else -> "Failed to change password: ${exception.message}"
+                                    }
+                                    Toast.makeText(
+                                        context,
+                                        errorMessage,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            )
+                        },
+                        onDismiss = { showChangePasswordDialog = false }
                     )
                 }
             }
@@ -120,16 +258,11 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfilePicture(imageUri: String, onEditClick: (Uri) -> Unit) {
+fun ProfilePicture() {
     Box(
         modifier = Modifier.size(110.dp)
     ) {
-        val painter = rememberAsyncImagePainter(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(if (imageUri.isNotEmpty()) imageUri else R.drawable.def)
-                .size(Size(100, 100))
-                .build()
-        )
+        val painter = rememberAsyncImagePainter(R.drawable.def)
         Image(
             painter = painter,
             contentDescription = "Profile picture",
@@ -140,7 +273,7 @@ fun ProfilePicture(imageUri: String, onEditClick: (Uri) -> Unit) {
                 .border(
                     width = 3.dp,
                     brush = Brush.linearGradient(
-                        colors = listOf(
+                        listOf(
                             MaterialTheme.colorScheme.primary,
                             MaterialTheme.colorScheme.secondary
                         )
@@ -150,14 +283,13 @@ fun ProfilePicture(imageUri: String, onEditClick: (Uri) -> Unit) {
         )
 
         FloatingActionButton(
-            onClick = {
-                // TODO: استدعاء Image Picker هنا وتمرير Uri إلى onEditClick
-            },
+            onClick = { /* no-op for static */ },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .size(32.dp),
+                .size(28.dp),
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            shape = CircleShape
         ) {
             Icon(
                 imageVector = Icons.Default.Edit,
@@ -182,8 +314,11 @@ fun SettingsMenuItem(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .background(Color.Transparent, shape = RoundedCornerShape(8.dp))
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .background(
+                MaterialTheme.colorScheme.surfaceContainer,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(horizontal = 12.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -196,7 +331,7 @@ fun SettingsMenuItem(
         Text(
             text = text,
             color = textColor,
-            fontSize = 14.sp,
+            fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
@@ -223,29 +358,25 @@ fun SettingsMenu(
     isDarkTheme: Boolean
 ) {
     Card(
-        modifier = modifier.fillMaxHeight(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        modifier = modifier.fillMaxSize(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         LazyColumn(
             modifier = Modifier
-                .fillMaxHeight()
+                .fillMaxSize()
                 .padding(vertical = 4.dp)
         ) {
             item {
-                Text(
-                    text = "Account",
-                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                SectionHeader("Account")
             }
             items(
                 listOf(
-                    Pair("Edit Profile Details", Icons.Default.PersonAdd),
-                    Pair("Change Password", Icons.Default.Lock),
-                    Pair("Logout", Icons.Default.Person)
+                    "Edit Profile Details" to Icons.Default.PersonAdd,
+                    "Change Password" to Icons.Default.Lock,
+                    "Logout" to Icons.Default.Person
                 )
             ) { (text, icon) ->
                 SettingsMenuItem(
@@ -256,46 +387,45 @@ fun SettingsMenu(
             }
 
             item {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Preferences",
-                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                SectionHeader("Preferences")
             }
             items(
                 listOf(
-                    Pair("Notifications", Icons.Default.Notifications),
-                    Pair("Dark Theme", Icons.Default.Palette)
+                    "Notifications" to Icons.Default.Notifications,
+                    "Dark Theme" to Icons.Default.Palette
                 )
             ) { (text, icon) ->
                 SettingsMenuItem(
                     text = text,
                     icon = icon,
-                    isSwitchEnabled = if (text == "Notifications") isNotificationsEnabled else isDarkTheme,
-                    onSwitchChange = { enabled ->
-                        onItemClick(text)
+                    isSwitchEnabled = when (text) {
+                        "Notifications" -> isNotificationsEnabled
+                        "Dark Theme" -> isDarkTheme
+                        else -> null
                     },
-                    onClick = { onItemClick(text) }
+                    onSwitchChange = when (text) {
+                        "Notifications" -> {
+                            { onItemClick("Notifications") }
+                        }
+
+                        "Dark Theme" -> {
+                            { onItemClick("Dark Theme") }
+                        }
+
+                        else -> null
+                    },
+                    onClick = { onItemClick(text) },
+                    modifier = if (text == "Notifications") Modifier.padding(bottom = 2.dp) else Modifier
                 )
             }
 
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Data",
-                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                SectionHeader("Data")
             }
             items(
                 listOf(
-                    Pair("Reset Data", Icons.Default.Warning),
-                    Pair("Delete Account", Icons.Default.Warning)
+                    "Reset Data" to Icons.Default.Warning,
+                    "Delete Account" to Icons.Default.Warning
                 )
             ) { (text, icon) ->
                 SettingsMenuItem(
@@ -309,28 +439,234 @@ fun SettingsMenu(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ProfileScreenLightPreview() {
-    AppTheme(darkTheme = false) {
-        ProfileScreen(
-            viewModel = ProfileViewModel(
-                localRepo = LocalProfileRepository(),
-                remoteRepo = RemoteProfileRepository()
+fun SectionHeader(title: String) {
+    Text(
+        text = title,
+        modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp),
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        fontSize = 12.sp,
+        fontWeight = FontWeight.SemiBold
+    )
+}
+
+@Composable
+fun ConfirmationDialog(
+    title: String,
+    message: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    confirmButtonColor: Color = MaterialTheme.colorScheme.primary
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = title,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold
             )
-        )
-    }
+        },
+        text = {
+            Text(
+                text = message,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = confirmButtonColor,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                Text("Cancel")
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
+    )
+}
+
+@Composable
+fun EditProfileDialog(
+    currentName: String,
+    currentEmail: String,
+    onConfirm: (String, String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var name by remember { mutableStateOf(currentName) }
+    var email by remember { mutableStateOf(currentEmail) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Edit Profile",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Name") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(name, email) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                Text("Cancel")
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
+    )
+}
+
+@Composable
+fun ChangePasswordDialog(
+    onConfirm: (String, String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var oldPassword by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    // Initialize as false so passwords start as invisible (masked)
+    var oldPasswordVisible by remember { mutableStateOf(false) }
+    var newPasswordVisible by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Change Password",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = oldPassword,
+                    onValueChange = { oldPassword = it },
+                    label = { Text("Old Password") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    singleLine = true,
+                    visualTransformation = if (oldPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { oldPasswordVisible = !oldPasswordVisible }) {
+                            Icon(
+                                imageVector = if (oldPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = if (oldPasswordVisible) "Hide password" else "Show password"
+                            )
+                        }
+                    }
+                )
+                OutlinedTextField(
+                    value = newPassword,
+                    onValueChange = { newPassword = it },
+                    label = { Text("New Password") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    visualTransformation = if (newPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { newPasswordVisible = !newPasswordVisible }) {
+                            Icon(
+                                imageVector = if (newPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = if (newPasswordVisible) "Hide password" else "Show password"
+                            )
+                        }
+                    }
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(oldPassword, newPassword) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                Text("Cancel")
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
+    )
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
+fun ProfileScreenLightPreview() {
+    AppTheme(darkTheme = false) {
+        ProfileScreen()
+    }
+}
+
+@Preview(
+    showBackground = true,
+    showSystemUi = true,
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
 fun ProfileScreenDarkPreview() {
     AppTheme(darkTheme = true) {
-        ProfileScreen(
-            viewModel = ProfileViewModel(
-                localRepo = LocalProfileRepository(),
-                remoteRepo = RemoteProfileRepository()
-            )
-        )
+        ProfileScreen()
     }
 }

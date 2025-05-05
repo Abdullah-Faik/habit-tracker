@@ -11,8 +11,10 @@ class LocalProfileRepository {
         UserProfile(
             name = "",
             profileImageUri = "",
+            Password = "",
             notificationsEnabled = false,
             darkTheme = false
+
         )
     )
     val userProfile = _userProfile.asStateFlow()
@@ -26,6 +28,12 @@ class LocalProfileRepository {
     fun updateName(name: String) {
         Log.d(TAG, "updateName: name=$name")
         _userProfile.value = _userProfile.value.copy(name = name)
+        Log.i(TAG, "updateName: success")
+    }
+
+    fun updatePassword(Password: String) {
+        Log.d(TAG, "updateName: name=$Password")
+        _userProfile.value = _userProfile.value.copy(name = Password)
         Log.i(TAG, "updateName: success")
     }
 

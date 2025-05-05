@@ -51,12 +51,7 @@ fun MainApp(modifier: Modifier = Modifier) {
                         }
                     }
                 )
-                ProfileScreen(
-                    viewModel = ProfileViewModel(
-                        localRepo = LocalProfileRepository(),
-                        remoteRepo = RemoteProfileRepository()
-                    )
-                )
+                ProfileScreen()
             }
         }
     }
