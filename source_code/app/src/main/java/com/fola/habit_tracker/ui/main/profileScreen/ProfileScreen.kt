@@ -69,7 +69,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.fola.habit_tracker.R
 import com.fola.habit_tracker.ui.theme.AppTheme
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 
 @Composable
@@ -80,11 +79,15 @@ fun ProfileScreen(
     val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
     val isNotificationsEnabled by viewModel.isNotificationsEnabled.collectAsStateWithLifecycle()
     val isDarkTheme by viewModel.isDarkTheme.collectAsStateWithLifecycle()
+    var currentEmail by remember { mutableStateOf(viewModel.getCurrentEmail()) }
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
     var showEditProfileDialog by remember { mutableStateOf(false) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
+    var showConfirmEmailDialog by remember { mutableStateOf(false) }
+    var pendingEmail by remember { mutableStateOf("") }
+    var pendingPassword by remember { mutableStateOf("") }
     val context = LocalContext.current
 
     AppTheme(darkTheme = isDarkTheme) {
@@ -134,7 +137,7 @@ fun ProfileScreen(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = FirebaseAuth.getInstance().currentUser?.email ?: "No email",
+                                text = currentEmail,
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
@@ -218,13 +221,56 @@ fun ProfileScreen(
                 if (showEditProfileDialog) {
                     EditProfileDialog(
                         currentName = userProfile.name,
-                        currentEmail = FirebaseAuth.getInstance().currentUser?.email ?: "",
-                        onConfirm = { newName, newEmail ->
+                        currentEmail = currentEmail,
+                        onConfirm = { newName, newEmail, password ->
                             viewModel.onNameChanged(newName)
-                            viewModel.updateEmail(newEmail)
-                            showEditProfileDialog = false
+                            if (newEmail != currentEmail) {
+                                if (password.isEmpty()) {
+                                    Toast.makeText(
+                                        context,
+                                        "Please write your current password before updating",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    return@EditProfileDialog
+                                }
+                                pendingEmail = newEmail
+                                pendingPassword = password
+                                viewModel.updateEmail(
+                                    newEmail,
+                                    password,
+                                    context,
+                                    onSuccess = {
+                                        showConfirmEmailDialog = true // Show dialog only on success
+                                    },
+                                    onError = { errorMessage ->
+                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
+                                            .show()
+                                    }
+                                )
+                            } else if (newEmail == currentEmail && newName == userProfile.name) {
+                                Toast.makeText(context, "Please Update Your Email", Toast.LENGTH_SHORT).show()
+                                showEditProfileDialog = true
+                            } else {
+                                showEditProfileDialog = false
+                            }
                         },
                         onDismiss = { showEditProfileDialog = false }
+                    )
+                }
+
+                if (showConfirmEmailDialog) {
+                    ConfirmationDialog(
+                        title = "Confirm Email Update",
+                        message = "Have you verified the new email ($pendingEmail)?",
+                        onConfirm = {
+                            viewModel.confirmEmailUpdate(pendingEmail, pendingPassword, context)
+                            currentEmail = viewModel.getCurrentEmail() // Update displayed email
+                            showConfirmEmailDialog = false
+                            showEditProfileDialog = false
+                            Toast.makeText(context, "Please Verify Your Email", Toast.LENGTH_SHORT).show()
+                        },
+                        onDismiss = { showConfirmEmailDialog = false },
+                        confirmButtonColor = MaterialTheme.colorScheme.primary
                     )
                 }
 
@@ -503,11 +549,13 @@ fun ConfirmationDialog(
 fun EditProfileDialog(
     currentName: String,
     currentEmail: String,
-    onConfirm: (String, String) -> Unit,
+    onConfirm: (String, String, String) -> Unit,
     onDismiss: () -> Unit
 ) {
     var name by remember { mutableStateOf(currentName) }
     var email by remember { mutableStateOf(currentEmail) }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -533,15 +581,34 @@ fun EditProfileDialog(
                     value = email,
                     onValueChange = { email = it },
                     label = { Text("Email") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Current Password (required for email change)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                            )
+                        }
+                    }
                 )
             }
         },
         confirmButton = {
             Button(
-                onClick = { onConfirm(name, email) },
+                onClick = { onConfirm(name, email, password) },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -572,7 +639,6 @@ fun ChangePasswordDialog(
 ) {
     var oldPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
-    // Initialize as false so passwords start as invisible (masked)
     var oldPasswordVisible by remember { mutableStateOf(false) }
     var newPasswordVisible by remember { mutableStateOf(false) }
 

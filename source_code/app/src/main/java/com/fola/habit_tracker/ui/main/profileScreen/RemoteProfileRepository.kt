@@ -28,8 +28,10 @@ class RemoteProfileRepository {
                     Log.d(TAG, "loadUserProfile: creating default profile")
                     val defaultProfile = UserProfile(
                         name = auth.currentUser?.displayName ?: "Guest",
+                        email = auth.currentUser?.email ?: "", // Add email
                         profileImageUri = defaultProfileImageUri,
-                        notificationsEnabled = true,
+                        Password = "", // Initialize Password
+                        notificationsEnabled = false,
                         darkTheme = false
                     )
                     saveUserProfile(

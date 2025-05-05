@@ -10,6 +10,7 @@ class LocalProfileRepository {
     private val _userProfile = MutableStateFlow(
         UserProfile(
             name = "",
+            email = "",
             profileImageUri = "",
             Password = "",
             notificationsEnabled = false,
@@ -31,10 +32,14 @@ class LocalProfileRepository {
         Log.i(TAG, "updateName: success")
     }
 
-    fun updatePassword(Password: String) {
-        Log.d(TAG, "updateName: name=$Password")
-        _userProfile.value = _userProfile.value.copy(name = Password)
-        Log.i(TAG, "updateName: success")
+    fun updateEmail(newEmail: String) {
+        _userProfile.value = _userProfile.value.copy(email = newEmail)
+    }
+
+    fun updatePassword(password: String) {
+        Log.d(TAG, "updatePassword: password=$password")
+        _userProfile.value = _userProfile.value.copy(Password = password)
+        Log.i(TAG, "updatePassword: success")
     }
 
     fun updateProfileImage(uri: String) {
