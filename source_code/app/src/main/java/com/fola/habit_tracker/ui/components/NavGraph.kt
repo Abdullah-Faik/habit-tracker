@@ -20,7 +20,7 @@ fun TaskNavigation() {
             HabitScreen(navController)
         }
         composable(route = "addingHabit") {
-            AddingHabitScreen(navController)
+            AddingHabitScreen()
         }
     }
 }

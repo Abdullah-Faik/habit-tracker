@@ -11,28 +11,25 @@ import java.time.LocalTime
 
 
 class FakeHabitsRepository : HabitsRepository {
-    suspend fun getAllHabits(): Flow<List<Habit>> {
-        return flowOf(
-            listOf(
-                Habit(id = 1, title = "Drink Water", repeatedType = RepeatedType.DAILY),
-                Habit(id = 2, title = "Read Book", repeatedType = RepeatedType.DAILY),
-                Habit(id = 3, title = "Exercise", reminderTime = LocalTime.now()),
-                Habit(id = 3, title = "Exercise", reminderTime = LocalTime.now()),
-                Habit(id = 3, title = "Exercise", reminderTime = LocalTime.now()),
-                Habit(id = 3, title = "Exercise", reminderTime = LocalTime.now()),
-                Habit(id = 3, title = "Exercise", reminderTime = LocalTime.now()),
 
-                )
-        )
-    }
 
     override suspend fun getActiveHabitsFlow(): Flow<List<Habit>> {
         TODO("Not yet implemented")
     }
 
     override fun getDailyHabits(dayId: LocalDate): Flow<DayWithHabits> {
-        TODO("Not yet implemented")
-    }
+        return flowOf(
+            DayWithHabits(
+                day = com.fola.habit_tracker.data.data_base.Day(LocalDate.now()),
+                habits = listOf(
+                    Habit(id = 1, title = "Drink Water", repeatedType = RepeatedType.DAILY),
+                    Habit(id = 2, title = "Read Book", repeatedType = RepeatedType.DAILY),
+                    Habit(id = 3, title = "Exercise", startTime = LocalTime.now()),
+                    Habit(id = 4, title = "Meditate", startTime = LocalTime.now()),
+                    Habit(id = 5, title = "Sleep Early", startTime = LocalTime.now())
+                )
+            )
+        )    }
 
     override suspend fun addNewDailyHabit(habit: Habit) {
         TODO("Not yet implemented")

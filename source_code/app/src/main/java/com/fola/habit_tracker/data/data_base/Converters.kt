@@ -35,12 +35,12 @@ class Converters {
 
     //convertDateAndTime
     @TypeConverter
-    fun fromReminderTime(time: LocalTime): Int {
+    fun fromStartTime(time: LocalTime): Int {
         return (time.hour * 100 + time.minute)
     }
 
     @TypeConverter
-    fun toReminderTime(time: Int): LocalTime {
+    fun toStartTime(time: Int): LocalTime {
         return LocalTime.of(time / 100, time % 100)
     }
 
@@ -54,6 +54,15 @@ class Converters {
     @TypeConverter
     fun toLocalDate(dateString: String?): LocalDate? {
         return dateString?.let { LocalDate.parse(it, DateTimeFormatter.ofPattern("yyyy-MM-dd")) }
+    }
+    @TypeConverter
+    fun fromIntList(list: List<Int>?): String {
+        return list?.joinToString(",") ?: ""
+    }
+
+    @TypeConverter
+    fun toIntList(data: String?): List<Int> {
+        return data?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
     }
 
 }
