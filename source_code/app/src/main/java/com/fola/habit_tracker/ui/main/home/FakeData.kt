@@ -1,8 +1,8 @@
 package com.fola.habit_tracker.ui.main.home
 
-import com.fola.habit_tracker.data.data_base.DayWithHabits
-import com.fola.habit_tracker.data.data_base.Habit
-import com.fola.habit_tracker.data.data_base.RepeatedType
+import com.fola.habit_tracker.data.database.DayWithHabits
+import com.fola.habit_tracker.data.database.Habit
+import com.fola.habit_tracker.data.database.RepeatedType
 import com.fola.habit_tracker.data.repositry.HabitsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -20,7 +20,7 @@ class FakeHabitsRepository : HabitsRepository {
     override fun getDailyHabits(dayId: LocalDate): Flow<DayWithHabits> {
         return flowOf(
             DayWithHabits(
-                day = com.fola.habit_tracker.data.data_base.Day(LocalDate.now()),
+                day = com.fola.habit_tracker.data.database.Day(LocalDate.now()),
                 habits = listOf(
                     Habit(id = 1, title = "Drink Water", repeatedType = RepeatedType.DAILY),
                     Habit(id = 2, title = "Read Book", repeatedType = RepeatedType.DAILY),
@@ -43,7 +43,14 @@ class FakeHabitsRepository : HabitsRepository {
         TODO("Not yet implemented")
     }
 
-}
+    override suspend fun addNewHabit(habit: Habit) {
+        TODO("Not yet implemented")
+    }
 
+    override fun getDailyHabitProgress(dayId: LocalDate, habitId: Long): Flow<Float> {
+        TODO("Not yet implemented")
+    }
+
+}
 
 val fakeViewModel = HomeViewModel(habitsRepository = FakeHabitsRepository())

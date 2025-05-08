@@ -2,7 +2,6 @@ package com.fola.habit_tracker.ui.main.home
 
 import android.content.res.Configuration
 import androidx.annotation.DrawableRes
-import androidx.annotation.Nullable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -34,8 +32,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fola.habit_tracker.R
-import com.fola.habit_tracker.data.data_base.Habit
-import com.fola.habit_tracker.data.data_base.RepeatedType
+import com.fola.habit_tracker.data.database.Habit
+import com.fola.habit_tracker.data.database.RepeatedType
 import com.fola.habit_tracker.ui.theme.AppTheme
 import java.time.format.DateTimeFormatter
 
@@ -67,14 +65,17 @@ fun TasksCard(
                     .weight(.8f),
             ) {
                 Image(
-                    painter = painterResource(R.drawable.ic_launcher_background),
-                    contentDescription = "",
+                    painter = painterResource(habit.icon),
+                    contentDescription = habit.iconDescription,
                     modifier = Modifier
                         .weight(.2f)
                         .padding(4.dp)
                         .clip(RoundedCornerShape(20))
                         .aspectRatio(1f)
-                        .border((2).dp, Color.White, RoundedCornerShape(20)),
+                        //.border((2).dp, Color.White, RoundedCornerShape(20))
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(8.dp),
+
                     contentScale = ContentScale.Crop
                 )
                 Column(
@@ -123,7 +124,7 @@ fun TasksCard(
                         .clip(RoundedCornerShape(50))
                         .background(
                             brush = SolidColor(Color(0xB766E36A)),
-                            alpha = progress,
+                            alpha = progress.coerceAtLeast(0.5f),
                             shape = RoundedCornerShape(50)
                         )
                         .fillMaxSize(),

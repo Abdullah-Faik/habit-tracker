@@ -1,6 +1,5 @@
-package com.fola.habit_tracker.data.data_base
+package com.fola.habit_tracker.data.database
 
-import android.content.ClipDescription
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -8,15 +7,13 @@ import androidx.room.Junction
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import com.fola.habit_tracker.R
-import com.fola.habit_tracker.ui.theme.secondaryContainerLight
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.Date
 
 
 enum class RepeatedType {
-    ONCE, DAILY, WEEKLY, MONTHLY, YEARLY
+    ONCE, DAILY, WEEKLY, YEARLY
 }
 
 @Entity(tableName = "habit")
@@ -29,15 +26,16 @@ data class Habit(
     @ColumnInfo(name = "color") val color: Long = 0xFF03A9F5,
     @ColumnInfo(name = "color_name") val colorName: String = "Light Blue",
     @ColumnInfo(name = "repeated_type") val repeatedType: RepeatedType = RepeatedType.DAILY,
-    @ColumnInfo(name = "days") val daya: List<Int> = emptyList(),
+    @ColumnInfo(name = "days") val days: MutableSet<Int> = mutableSetOf(),
+    @ColumnInfo(name = "notify") val notification: Int = 1,
     @ColumnInfo(name = "start_date") val startDate: LocalDate = LocalDate.now(),
-    @ColumnInfo(name = "end_date") val endDate: LocalDate = LocalDate.MAX,
+    @ColumnInfo(name = "end_date") val endDate: LocalDate = LocalDate.of(2099,12,31),
     @ColumnInfo(name = "start_time") val startTime: LocalTime = LocalTime.now(),
-    @ColumnInfo(name = "times_of_unit") val timesOfUnit: Int = 1,
+    @ColumnInfo(name = "times_of_unit") val timesOfUnit: Int = 0,
     @ColumnInfo(name = "unit") val unit: String = "",
     @ColumnInfo(name = "is_inactive") val isInactive: Int = 0,
     @ColumnInfo(name = "is_removed") val isRemoved: Int = 0,
-    @ColumnInfo(name = "remove_date") val removedDate: Date? = null,
+    @ColumnInfo(name = "remove_date") val removedDate: LocalDate = LocalDate.MAX,
 )
 
 @Entity(tableName = "day")

@@ -1,11 +1,11 @@
-package com.fola.habit_tracker.data.data_base
+package com.fola.habit_tracker.data.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.fola.habit_tracker.data.data_base.daos.DailyHabitsDao
-import com.fola.habit_tracker.data.data_base.daos.DayDao
-import com.fola.habit_tracker.data.data_base.daos.HabitsDao
+import com.fola.habit_tracker.data.database.daos.DailyHabitsDao
+import com.fola.habit_tracker.data.database.daos.DayDao
+import com.fola.habit_tracker.data.database.daos.HabitsDao
 
 
 @Database(entities = [Day::class, Habit::class, DailyHabits::class], version = 2)

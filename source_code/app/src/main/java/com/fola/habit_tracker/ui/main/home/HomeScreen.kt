@@ -21,7 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,7 +39,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import com.fola.habit_tracker.R
-import com.fola.habit_tracker.data.data_base.Habit
+import com.fola.habit_tracker.data.database.Habit
 import com.fola.habit_tracker.ui.components.icons.PlusSmall
 import com.fola.habit_tracker.ui.components.mainFont
 import com.fola.habit_tracker.ui.theme.AppTheme
@@ -55,6 +54,8 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
 ) {
     val habits = viewModel.habits.collectAsState()
+    val dailyHabit = viewModel.dailyHabits.collectAsState()
+    val day = viewModel.day.collectAsState()
     var showCalendar by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -148,10 +149,17 @@ fun HomeScreen(
                     .padding(horizontal = 8.dp),
             ) {
                 items(items = habits.value.habits, key = { it.id }) { habit ->
+                    Log.d("prgress",viewModel.getDailyHabitProgress(
+                        dayId = day.value.dayId,
+                        habitId = habit.id
+                    ).collectAsState(initial = 0f).value.toString())
                     TasksCard(
                         modifier = Modifier.padding(vertical = 2.dp),
                         habit = habit,
-                        progress = 0.3f,
+                        progress = viewModel.getDailyHabitProgress(
+                            dayId = day.value.dayId,
+                            habitId = habit.id
+                        ).collectAsState(initial = 0f).value,
                         onClickable = {
                             Log.d("clicking", "clicked")
                             viewModel.removeDailyHabit(LocalDate.now(), habit.id)
