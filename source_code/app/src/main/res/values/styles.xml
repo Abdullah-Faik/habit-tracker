@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="CustomNumberPicker">
+        <item name="android:textColorPrimary">@android:color/white
+        </item> <!-- Selected text color -->
+        <item name="android:textColorSecondary">@android:color/darker_gray
+        </item> <!-- Unselected text color -->
+        <item name="android:textSize">24sp</item> <!-- Text size -->
+    </style>
+</resources>

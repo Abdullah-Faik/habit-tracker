@@ -28,6 +28,25 @@ open class ProfileViewModel(
 
     init {
         loadUserProfileFromFirebase()
+        loadLocalImageUri()
+    }
+
+    private fun loadLocalImageUri() {
+        Log.d(TAG, "loadLocalImageUri")
+        viewModelScope.launch {
+            val context = getApplicationContext()
+            localRepo.loadProfileImageUri(context)
+        }
+    }
+
+    private fun getApplicationContext(): Context {
+        return try {
+            Class.forName("android.app.ActivityThread")
+                .getMethod("currentApplication")
+                .invoke(null) as Context
+        } catch (e: Exception) {
+            throw IllegalStateException("Cannot access application context", e)
+        }
     }
 
     private fun loadUserProfileFromFirebase() {
@@ -229,20 +248,12 @@ open class ProfileViewModel(
         Log.i(TAG, "toggleTheme: success")
     }
 
-    fun onImageSelected(uri: Uri) {
+    fun onImageSelected(uri: Uri, context: Context) {
         Log.d(TAG, "onImageSelected: uri=$uri")
         viewModelScope.launch {
-            remoteRepo.uploadProfileImage(
-                uri,
-                onSuccess = { downloadUrl ->
-                    Log.i(TAG, "onImageSelected: success")
-                    localRepo.updateProfileImage(downloadUrl)
-                    syncProfileToFirebase()
-                },
-                onError = { e ->
-                    Log.e(TAG, "onImageSelected: error=${e.message}")
-                }
-            )
+            // Save URI locally using SharedPreferences
+            localRepo.saveProfileImageUri(context, uri.toString())
+            Toast.makeText(context, "Profile picture selected", Toast.LENGTH_SHORT).show()
         }
     }
 

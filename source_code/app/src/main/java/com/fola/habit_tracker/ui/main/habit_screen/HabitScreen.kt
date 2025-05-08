@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -78,8 +77,15 @@ fun HabitScreen(navController: NavController) {
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },
-                navigationIcon = {}
-
+                navigationIcon = {
+                    IconButton(onClick = { /* Handle menu click */ }) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Menu",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -99,16 +105,13 @@ fun HabitScreen(navController: NavController) {
                             try {
                                 nestedNavController.navigate(HabitScreenRoutes.AddingHabit.route)
                             } catch (e: IllegalArgumentException) {
-                                Log.e(
-                                    "NestedNavigationError",
-                                    "Failed to navigate to adding_habit: ${e.message}"
-                                )
+                                Log.e("NestedNavigationError", "Failed to navigate to adding_habit: ${e.message}")
                             }
                         }
                     )
                 }
                 composable(HabitScreenRoutes.AddingHabit.route) {
-                    AddingHabitScreen()
+                    AddingHabitScreen(nestedNavController)
                 }
             }
         }
@@ -129,7 +132,55 @@ fun HabitMainContent(
         Column(
             modifier = Modifier,
         ) {
+            // Tab Row (Single / Recurring)
+            TabRow(
+                selectedTabIndex = selectedTab,
+                indicator = { tabPositions ->
+                    Box(
+                        modifier = Modifier
+                            .tabIndicatorOffset(tabPositions[selectedTab])
+                            .padding(horizontal = 67.dp)
+                            .fillMaxWidth(0.5f)
+                            .height(2.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                    )
+                },
+                divider = {}
+            ) {
+                Tab(
+                    selected = selectedTab == 0,
+                    onClick = { selectedTab = 0 },
+                    text = {
+                        Text(
+                            text = "Single Habits",
+                            fontFamily = interFont,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    },
+                    selectedContentColor = MaterialTheme.colorScheme.inverseSurface,
+                    unselectedContentColor = Color(0xff353434)
+                )
+                Tab(
+                    selected = selectedTab == 1,
+                    onClick = { selectedTab = 1 },
+                    text = {
+                        Text(
+                            text = "Recurring Habits",
+                            fontFamily = interFont,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    },
+                    selectedContentColor = MaterialTheme.colorScheme.inverseSurface,
+                    unselectedContentColor = Color(0xff353434)
+                )
+            }
+        }
 
+        Column(
+            modifier = Modifier
+        ) {
             Spacer(modifier = Modifier.size(200.dp))
             Box(
                 modifier = Modifier.fillMaxWidth(),
@@ -171,10 +222,15 @@ fun HabitMainContent(
             )
         }
 
-        Button(
+        // Floating Action Button to navigate to AddingHabitScreen
+        FloatingActionButton(
             modifier = Modifier
-                .padding(16.dp),
+                .padding(16.dp)
+                .align(Alignment.End),
             onClick = onAddHabitClick,
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = Color.White,
+            shape = CircleShape,
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.addfab),

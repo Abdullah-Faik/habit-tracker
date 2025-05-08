@@ -28,9 +28,9 @@ class RemoteProfileRepository {
                     Log.d(TAG, "loadUserProfile: creating default profile")
                     val defaultProfile = UserProfile(
                         name = auth.currentUser?.displayName ?: "Guest",
-                        email = auth.currentUser?.email ?: "", // Add email
+                        email = auth.currentUser?.email ?: "",
                         profileImageUri = defaultProfileImageUri,
-                        Password = "", // Initialize Password
+                        Password = "",
                         notificationsEnabled = false,
                         darkTheme = false
                     )
@@ -69,18 +69,27 @@ class RemoteProfileRepository {
 
     fun uploadProfileImage(uri: Uri, onSuccess: (String) -> Unit, onError: (Exception) -> Unit) {
         Log.d(TAG, "uploadProfileImage: userId=$userId, uri=$uri")
-        val ref = storage.child("profile_pics/$userId.jpg")
-        ref.putFile(uri)
-            .addOnSuccessListener {
-                ref.downloadUrl.addOnSuccessListener { downloadUri ->
-                    Log.i(TAG, "uploadProfileImage: success")
-                    onSuccess(downloadUri.toString())
+        try {
+            val ref = storage.child("profile_pics/$userId.jpg")
+            ref.putFile(uri)
+                .addOnSuccessListener {
+                    Log.d(TAG, "uploadProfileImage: File upload initiated")
+                    ref.downloadUrl.addOnSuccessListener { downloadUri ->
+                        Log.i(TAG, "uploadProfileImage: success, downloadUrl=$downloadUri")
+                        onSuccess(downloadUri.toString())
+                    }.addOnFailureListener { e ->
+                        Log.e(TAG, "uploadProfileImage: Failed to get download URL, error=${e.message}")
+                        onError(e)
+                    }
                 }
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "uploadProfileImage: error=${e.message}")
-                onError(e)
-            }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "uploadProfileImage: File upload failed, error=${e.message}")
+                    onError(e)
+                }
+        } catch (e: Exception) {
+            Log.e(TAG, "uploadProfileImage: Exception caught, error=${e.message}")
+            onError(e)
+        }
     }
 
     fun logout() {

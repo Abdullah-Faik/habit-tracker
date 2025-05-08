@@ -95,12 +95,12 @@ fun TasksCard(
 
                     ) {
                         Text(
-                            text = if (habit.repeatedType == RepeatedType.ONCE) "Task" else "Habit",
+                            text = if (habit.repeatedType == RepeatedType.TASK) "Task" else "Habit",
                             fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = "⏰ ${habit.startTime.format(DateTimeFormatter.ofPattern("hh:mm a"))}",
+                            text = "⏰ ${habit.reminderTime.format(DateTimeFormatter.ofPattern("hh:mm a"))}",
                             fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.onSurface,
                         )

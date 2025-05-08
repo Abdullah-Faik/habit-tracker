@@ -1,7 +1,7 @@
 package com.fola.habit_tracker.ui.main.habit_screen
 
-import android.util.Log
-import androidx.compose.foundation.clickable
+import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,16 +11,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlarmAdd
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,10 +30,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimeInput
-import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,26 +43,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.fola.habit_tracker.data.data_base.RepeatedType
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.fola.habit_tracker.ui.components.interFont
 import com.fola.habit_tracker.ui.theme.AppTheme
-import java.time.LocalDate
-import java.time.LocalTime
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddingHabitScreen(
-    viewModel: AddingHabitsViewmodel = viewModel()
-) {
-
-    val habit = viewModel.habit.collectAsState()
-    var expanded by remember { mutableStateOf(false) }
-
-
+fun AddingHabitScreen(navController: NavController) {
+    var taskName by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf("") }
     Scaffold(modifier = Modifier.fillMaxWidth()) { innerPadding ->
         Column(
             modifier = Modifier
@@ -69,182 +61,151 @@ fun AddingHabitScreen(
                 .padding(16.dp)
                 .padding(innerPadding)
         ) {
+            Spacer(modifier = Modifier.height(16.dp))
 
+            // Task input
             OutlinedTextField(
-                value = habit.value.title,
-                onValueChange = { newTitle -> viewModel.setHabitTitle(newTitle) },
+                value = taskName,
+                onValueChange = { taskName = it },
                 placeholder = {
                     Text(
-                        "Title",
+                        "New Task",
+                        color = Color(0xff353434),
                         fontFamily = interFont
                     )
                 },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions.Default
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = habit.value.description,
-                onValueChange = { newTitle -> viewModel.setHabitDescription(newTitle) },
-                placeholder = {
-                    Text(
-                        "Description (optional)",
-                        fontFamily = interFont
-                    )
-                },
-                singleLine = true,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = MaterialTheme.colorScheme.secondary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    errorBorderColor = MaterialTheme.colorScheme.error,
+                ),
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions.Default
             )
 
-            CustomDivider()
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-
-                ColorDropdown(
-                    modifier = Modifier
-                        .weight(.5f)
-                        .fillMaxWidth(),
-                    selectedColor = habit.value.color,
-                    colorName = habit.value.colorName,
-                    onColorSelected = { color, name -> viewModel.setHabitColor(color, name) },
-                    colorOptions = habitColors
+            Spacer(modifier = Modifier.height(16.dp))
+            Box {
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider(
+                    color = Color(0xff333232),
+                    thickness = 1.dp,
+                    modifier = Modifier.fillMaxWidth()
                 )
-
-                Box(modifier = Modifier.weight(.5f)) {
-
-                    IconsDropMenu(
-                        modifier = Modifier,
-                        icon = habit.value.icon,
-                        description = habit.value.iconDescription,
-                        onSelectedIcon = { icon, des -> viewModel.setHabitIcon(icon, des) },
-                        iconsList = habitIcons
-                    )
-                }
-
-
             }
 
-            CustomDivider()
-
-            RepeatRow(
-                repeatedType = habit.value.repeatedType,
-                onRepeatTypeChange = { r, l -> viewModel.setHabitRepeat(r, l) }
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TimeSetting(
-                onTimeChange = { viewModel.setHabitTime(it) },
-                time = habit.value.startTime
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = "Start Date",
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Start Date") },
-
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.CalendarMonth,
-                        contentDescription = "Date",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = if (habit.value.endDate == LocalDate.MAX) "End Date (optional)" else habit.value.endDate.toString(),
-                onValueChange = {},
-                readOnly = true,
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.CalendarMonth,
-                        contentDescription = "Date",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
+            // Date row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
-                    value = "Daily goal",
-                    onValueChange = {},
-                    modifier = Modifier
-                        .weight(.4f)
-                        .fillMaxWidth()
+                Icon(
+                    Icons.Default.CalendarMonth,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
                 )
-
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded },
-                    modifier = Modifier
-                        .weight(0.6f)
-                        .fillMaxWidth()
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Date", modifier = Modifier.weight(1f), fontFamily = interFont)
+                Button(
+                    onClick = { /* TODO: Date Picker */ },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    OutlinedTextField(
-                        value = "Unit per day",
-                        onValueChange = {},
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                        },
-                        readOnly = false,
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
+                    Text(
+                        "Today",
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontFamily = interFont,
                     )
-
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(RepeatedType.ONCE.name) },
-                            onClick = {
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(RepeatedType.DAILY.name) },
-                            onClick = {
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(RepeatedType.WEEKLY.name) },
-                            onClick = {
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(RepeatedType.MONTHLY.name) },
-                            onClick = {
-
-                            }
-                        )
-                    }
                 }
+            }
+            Box {
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider(
+                    color = Color(0xff333232),
+                    thickness = 1.dp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
+            // Time & Reminder row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Default.AlarmAdd,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Time & Reminder", modifier = Modifier.weight(1f), fontFamily = interFont)
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .background(color = MaterialTheme.colorScheme.onPrimary, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "0",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 12.sp,
+                        fontFamily = interFont
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Note section
+            Box {
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider(
+                    color = Color(0xff333232),
+                    thickness = 1.dp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.Top
+            ) {
+                Icon(
+                    Icons.Default.ChatBubble,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Note", fontFamily = interFont)
+                Spacer(modifier = Modifier.width(8.dp))
+                TextField(
+                    value = note,
+                    onValueChange = { note = it },
+                    placeholder = {
+                        Text(
+                            "Add a note",
+                            color = Color.Gray,
+                            fontFamily = interFont
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        cursorColor = Color.Cyan
+                    )
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))
             HorizontalDivider(
-                modifier = Modifier.padding(vertical = 8.dp),
+                color = Color.Gray,
                 thickness = 1.dp,
-                color = Color.Gray
+                modifier = Modifier.padding(vertical = 8.dp)
             )
             // Bottom buttons
             Row(
@@ -253,6 +214,7 @@ fun AddingHabitScreen(
             ) {
                 Box(modifier = Modifier, contentAlignment = Alignment.Center) {
                     TextButton(onClick = {
+                        navController.popBackStack() // Pop back to HabitMainContent
                     }) {
                         Text(
                             "Cancel",
@@ -265,6 +227,7 @@ fun AddingHabitScreen(
                 Box(modifier = Modifier, contentAlignment = Alignment.Center) {
                     TextButton(onClick = {
                         // TODO: Save task logic here
+                        navController.popBackStack() // Pop back to HabitMainContent
                     }) {
                         Text(
                             "Confirm",
@@ -279,184 +242,18 @@ fun AddingHabitScreen(
     }
 }
 
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun RepeatRow(
-    modifier: Modifier = Modifier,
-    repeatedType: RepeatedType,
-    onRepeatTypeChange: (RepeatedType, List<Int>) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded },
-            modifier = Modifier
-                .weight(0.4f)
-                .fillMaxWidth()
-        ) {
-            OutlinedTextField(
-                value = repeatedType.name,
-                onValueChange = {},
-                readOnly = true,
-                singleLine = true,
-                placeholder = {
-                    Text("Repeated Type")
-                },
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth()
-            )
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-            ) {
-                RepeatedType.entries.forEach { type ->
-                    DropdownMenuItem(
-                        text = { Text(type.name) },
-                        onClick = {
-                            onRepeatTypeChange(type, emptyList())
-                            expanded = false
-                        }
-                    )
-                }
-
-            }
-        }
-        when (repeatedType) {
-            RepeatedType.ONCE -> {}
-            RepeatedType.DAILY -> {}
-            RepeatedType.WEEKLY -> {}
-            RepeatedType.MONTHLY -> {}
-            RepeatedType.YEARLY -> {}
-        }
-    }
-
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TimeSetting(
-    modifier: Modifier = Modifier,
-    onTimeChange: (LocalTime) -> Unit,
-    time: LocalTime,
-) {
-    var timeValue by remember { mutableStateOf(time.toString()) }
-    var showDialog by remember { mutableStateOf(false) }
-    val timeState = rememberTimePickerState(
-        initialHour = time.hour,
-        initialMinute = time.minute
-    )
-
-    Log.d("Clickeded", showDialog.toString())
-
-    if (showDialog) {
-        Log.d("Clickedddddd", showDialog.toString())
-        Dialog(
-            onDismissRequest = { showDialog = false },
-            properties = DialogProperties(
-                dismissOnClickOutside = true,
-                usePlatformDefaultWidth = true
-            )
-        ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(260.dp)
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    TimeInput(
-                        state = timeState,
-                        modifier = Modifier.padding(vertical = 16.dp)
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        TextButton(
-                            onClick = { showDialog = false },
-                            modifier = Modifier.padding(8.dp)
-                        ) {
-                            Text("Dismiss")
-                        }
-                        TextButton(
-                            onClick = {
-                                val selectedTime = LocalTime.of(timeState.hour, timeState.minute)
-                                timeValue = selectedTime.toString()
-                                onTimeChange(selectedTime)
-                                showDialog = false
-                            },
-                            modifier = Modifier.padding(8.dp)
-                        ) {
-                            Text("Confirm")
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-    OutlinedTextField(
-        value = timeValue,
-        onValueChange = {}, // No-op since it's read-only
-        readOnly = true,
-        label = { Text("Start Time") },
-        leadingIcon = {
-            Icon(
-                Icons.Default.AlarmAdd,
-                contentDescription = "time",
-                tint = MaterialTheme.colorScheme.primary
-            )
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                Log.d("clicked", "inside textBox")
-                showDialog = true
-                Log.d("click", "inside text box $showDialog")
-            }
-    )
-    Text(text = timeValue, Modifier.clickable {
-        Log.d("clicked", "inside text")
-        showDialog = true
-        Log.d("click", "inside text $showDialog")
-    })
-}
-
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun AddingTaskLightPrev() {
     AppTheme {
-        AddingHabitScreen(
-            viewModel(
-            )
-        )
+        AddingHabitScreen(navController = rememberNavController())
     }
 }
-//
-//@Preview(showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-//@Composable
-//private fun AddingTaskDarkPrev() {
-//    AppTheme {
-//        AddingHabitScreen(
-//            viewModel(
-//            )
-//        )
-//    }
-//}
+
+@Preview(showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun AddingTaskDarkPrev() {
+    AppTheme {
+        AddingHabitScreen(navController = rememberNavController())
+    }
+}

@@ -2,9 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp) // ✅ هنا التغيير
+    alias(libs.plugins.ksp)
     id("com.google.gms.google-services")
-
 }
 
 android {
@@ -42,9 +41,7 @@ android {
     }
 }
 
-
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -65,7 +62,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     //extended icons
-    implementation ("androidx.compose.material:material-icons-extended:1.5.4")
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
     //firebase
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     implementation("com.google.firebase:firebase-auth:23.2.0")
@@ -85,6 +82,9 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
+    implementation("com.vanniktech:android-image-cropper:4.6.0")
 
+    implementation ("androidx.compose.ui:ui:1.6.8")
+    implementation ("androidx.compose.material3:material3:1.2.1")
+    implementation ("androidx.compose.foundation:foundation:1.6.8")
 }
-

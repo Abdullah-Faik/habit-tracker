@@ -1,6 +1,8 @@
 package com.fola.habit_tracker.ui.main.profileScreen
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -90,6 +92,16 @@ fun ProfileScreen(
     var pendingPassword by remember { mutableStateOf("") }
     val context = LocalContext.current
 
+    // Image picker launcher
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            viewModel.onImageSelected(it, context)
+            Toast.makeText(context, "Profile picture selected", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     AppTheme(darkTheme = isDarkTheme) {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background
@@ -127,7 +139,10 @@ fun ProfileScreen(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        ProfilePicture()
+                        ProfilePicture(
+                            imageUri = userProfile.profileImageUri,
+                            onEditClick = { imagePickerLauncher.launch("image/*") }
+                        )
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(
@@ -304,11 +319,18 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfilePicture() {
+fun ProfilePicture(
+    imageUri: String,
+    onEditClick: () -> Unit
+) {
     Box(
         modifier = Modifier.size(110.dp)
     ) {
-        val painter = rememberAsyncImagePainter(R.drawable.def)
+        val painter = rememberAsyncImagePainter(
+            model = imageUri.takeIf { it.isNotEmpty() } ?: R.drawable.def,
+            error = rememberAsyncImagePainter(R.drawable.def),
+            placeholder = rememberAsyncImagePainter(R.drawable.def)
+        )
         Image(
             painter = painter,
             contentDescription = "Profile picture",
@@ -329,7 +351,7 @@ fun ProfilePicture() {
         )
 
         FloatingActionButton(
-            onClick = { /* no-op for static */ },
+            onClick = onEditClick,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .size(28.dp),
@@ -453,11 +475,9 @@ fun SettingsMenu(
                         "Notifications" -> {
                             { onItemClick("Notifications") }
                         }
-
                         "Dark Theme" -> {
                             { onItemClick("Dark Theme") }
                         }
-
                         else -> null
                     },
                     onClick = { onItemClick(text) },
