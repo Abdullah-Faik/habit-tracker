@@ -49,6 +49,7 @@ data class DailyHabits(
     @ColumnInfo(name = "day_id") val dayId: LocalDate = LocalDate.now(),
     @ColumnInfo(name = "habit_id") val id: Long = 0,
     @ColumnInfo(name = "is_done") val isDone: Boolean = false,
+    @ColumnInfo(name = "habits_numbers") val habitsNumber: Int = 0,
     val progress: Float = 0f,
 )
 

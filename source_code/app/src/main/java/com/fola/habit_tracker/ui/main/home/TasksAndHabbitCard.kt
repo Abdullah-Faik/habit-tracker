@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
@@ -50,7 +51,7 @@ fun TasksCard(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .heightIn(min = 72.dp, max = 96.dp)
-                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .background(SolidColor(Color(habit.color)), alpha = 0.4f)
                 .padding(horizontal = 8.dp)
                 .clickable { onClickable() },
             verticalAlignment = Alignment.CenterVertically,
@@ -73,7 +74,7 @@ fun TasksCard(
                         .clip(RoundedCornerShape(20))
                         .aspectRatio(1f)
                         //.border((2).dp, Color.White, RoundedCornerShape(20))
-                        .background(MaterialTheme.colorScheme.background)
+                        .background(Color.White)
                         .padding(8.dp),
 
                     contentScale = ContentScale.Crop

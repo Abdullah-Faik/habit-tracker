@@ -4,10 +4,12 @@ import android.annotation.SuppressLint
 import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -44,6 +46,8 @@ import com.fola.habit_tracker.ui.components.icons.PlusSmall
 import com.fola.habit_tracker.ui.components.mainFont
 import com.fola.habit_tracker.ui.theme.AppTheme
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 
 @OptIn(UnstableApi::class)
@@ -89,9 +93,13 @@ fun HomeScreen(
             }
             Row(
                 modifier = Modifier
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(16))
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .border(1.dp, color = MaterialTheme.colorScheme.primary, RoundedCornerShape(16))
                     .padding(
                         horizontal = 16.dp,
-                        vertical = 24.dp
+                        vertical = 12.dp
                     )
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -107,14 +115,26 @@ fun HomeScreen(
                         contentDescription = "avatar",
                         Modifier
                             .size(98.dp)
+                            .border(
+                                4.dp, Color.White,
+                                RoundedCornerShape(50)
+                            )
                     )
-                    Text(
-                        text = "HI, Name \uD83D\uDC4B\uD83C\uDFFB",
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = mainFont,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 20.sp
-                    )
+                    Column {
+                        Text(
+                            text = "HI, Name \uD83D\uDC4B\uD83C\uDFFB",
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = mainFont,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 20.sp,
+                        )
+                        Spacer(Modifier.padding(1.dp))
+                        Text(
+                            text = LocalDate.now().format(
+                                DateTimeFormatter.ofPattern("EEE, dd MMM yyyy", Locale.ENGLISH)
+                            )
+                        )
+                    }
                 }
                 IconButton(
                     onClick = {
@@ -137,11 +157,13 @@ fun HomeScreen(
                 modifier = Modifier
                     .padding(vertical = 4.dp),
                 onCardPress = {
-                    Log.d("card", "day is $it")
-                    viewModel.getDayHabit(it)
-                }
+                    viewModel.setCurrentDay(it)
+                },
+                selectedDay = day.value.dayId
             )
-            ProgressCard(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+            ProgressCard(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+            , progress = viewModel.getDayProgress(day.value.dayId)
+            )
 
             LazyColumn(
                 modifier = Modifier
@@ -149,10 +171,12 @@ fun HomeScreen(
                     .padding(horizontal = 8.dp),
             ) {
                 items(items = habits.value.habits, key = { it.id }) { habit ->
-                    Log.d("prgress",viewModel.getDailyHabitProgress(
-                        dayId = day.value.dayId,
-                        habitId = habit.id
-                    ).collectAsState(initial = 0f).value.toString())
+                    Log.d(
+                        "prgress", viewModel.getDailyHabitProgress(
+                            dayId = day.value.dayId,
+                            habitId = habit.id
+                        ).collectAsState(initial = 0f).value.toString()
+                    )
                     TasksCard(
                         modifier = Modifier.padding(vertical = 2.dp),
                         habit = habit,
