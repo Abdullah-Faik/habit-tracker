@@ -1,44 +1,350 @@
 package com.fola.habit_tracker.ui.main.profileScreen
 
+import android.content.Context
+import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.ActionCodeSettings
+import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
-
-class ProfileViewModel(
-    private val repository: ProfileRepository
+open class ProfileViewModel(
+    private val localRepo: LocalProfileRepository,
+    private val remoteRepo: RemoteProfileRepository
 ) : ViewModel() {
+    private val TAG = "ProfileViewModel"
 
-    val userProfile: StateFlow<UserProfile> = repository.getUserProfile() as StateFlow<UserProfile>
-    val isNotificationsEnabled: StateFlow<Boolean> = repository.getNotificationsEnabled() as StateFlow<Boolean>
+    open val userProfile: StateFlow<UserProfile> = localRepo.userProfile
+    open val isNotificationsEnabled: StateFlow<Boolean> = localRepo.isNotificationsEnabled
+    open val isDarkTheme: StateFlow<Boolean> = localRepo.isDarkTheme
+
+    init {
+        loadUserProfileFromFirebase()
+        loadLocalImageUri()
+    }
+
+    private fun loadLocalImageUri() {
+        Log.d(TAG, "loadLocalImageUri")
+        viewModelScope.launch {
+            val context = getApplicationContext()
+            localRepo.loadProfileImageUri(context)
+        }
+    }
+
+    private fun getApplicationContext(): Context {
+        return try {
+            Class.forName("android.app.ActivityThread")
+                .getMethod("currentApplication")
+                .invoke(null) as Context
+        } catch (e: Exception) {
+            throw IllegalStateException("Cannot access application context", e)
+        }
+    }
+
+    private fun loadUserProfileFromFirebase() {
+        Log.d(TAG, "loadUserProfileFromFirebase")
+        viewModelScope.launch {
+            remoteRepo.loadUserProfile(
+                onSuccess = { remoteProfile ->
+                    Log.i(TAG, "loadUserProfileFromFirebase: success")
+                    localRepo.updateName(remoteProfile.name)
+                    localRepo.updateEmail(remoteProfile.email)
+                    localRepo.updatePassword(remoteProfile.Password)
+                    localRepo.updateProfileImage(remoteProfile.profileImageUri)
+                    localRepo.toggleNotifications(remoteProfile.notificationsEnabled)
+                    if (remoteProfile.darkTheme != isDarkTheme.value) {
+                        localRepo.toggleTheme()
+                    }
+                },
+                onError = { e ->
+                    Log.e(TAG, "loadUserProfileFromFirebase: error=${e.message}")
+                }
+            )
+        }
+    }
+
+    fun onNameChanged(newName: String) {
+        Log.d(TAG, "onNameChanged: name=$newName")
+        localRepo.updateName(newName)
+        syncProfileToFirebase()
+        Log.i(TAG, "onNameChanged: success")
+    }
+
+    fun updateEmail(
+        newEmail: String,
+        currentPassword: String,
+        context: Context,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        Log.d(TAG, "updateEmail: newEmail=$newEmail")
+        viewModelScope.launch {
+            try {
+                val user = FirebaseAuth.getInstance().currentUser
+                if (user == null) {
+                    Log.e(TAG, "updateEmail: No user logged in")
+                    onError("No user logged in")
+                    return@launch
+                }
+
+                // Check if current email is verified
+                if (!user.isEmailVerified) {
+                    Log.e(TAG, "updateEmail: Current email not verified")
+                    onError("Please verify your current email before updating it.")
+                    return@launch
+                }
+
+                // Re-authenticate the user with their current email and password
+                val currentEmail = user.email ?: throw IllegalStateException("User email is null")
+                val credential = EmailAuthProvider.getCredential(currentEmail, currentPassword)
+                user.reauthenticate(credential).await()
+                Log.i(TAG, "updateEmail: Re-authentication successful")
+
+                // Send verification email to the new email address
+                val actionCodeSettings = ActionCodeSettings.newBuilder()
+                    .setUrl("https://habit-tracker-7-3-2025.web.app/__/auth/action")
+                    .setHandleCodeInApp(true)
+                    .setAndroidPackageName("com.fola.habit_tracker", true, "1.0")
+                    .build()
+
+                FirebaseAuth.getInstance().sendSignInLinkToEmail(newEmail, actionCodeSettings)
+                    .addOnSuccessListener {
+                        Log.i(TAG, "updateEmail: Verification email sent to $newEmail")
+                        Toast.makeText(
+                            context,
+                            "A verification email has been sent to $newEmail. Please verify it before updating.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        onSuccess() // Notify UI to show confirmation dialog
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(
+                            TAG,
+                            "updateEmail: Failed to send verification email, error=${e.message}"
+                        )
+                        onError("Failed to send verification email: ${e.message}")
+                    }
+            } catch (e: Exception) {
+                Log.e(TAG, "updateEmail: error=${e.message}, stacktrace=${e.stackTraceToString()}")
+                val errorMessage = when (e) {
+                    is FirebaseAuthInvalidCredentialsException -> "Incorrect password"
+                    is FirebaseAuthException -> when (e.errorCode) {
+                        "ERROR_INVALID_EMAIL" -> "Invalid email format."
+                        else -> "Failed to process email update: ${e.message}"
+                    }
+                    else -> "Failed to process email update: ${e.message}"
+                }
+                onError(errorMessage)
+            }
+        }
+    }
+
+    fun confirmEmailUpdate(newEmail: String, currentPassword: String, context: Context) {
+        Log.d(TAG, "confirmEmailUpdate: newEmail=$newEmail")
+        viewModelScope.launch {
+            try {
+                val user = FirebaseAuth.getInstance().currentUser
+                if (user == null) {
+                    Log.e(TAG, "confirmEmailUpdate: No user logged in")
+                    Toast.makeText(context, "No user logged in", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                // Re-authenticate the user again before updating the email
+                val currentEmail = user.email ?: throw IllegalStateException("User email is null")
+                val credential = EmailAuthProvider.getCredential(currentEmail, currentPassword)
+                user.reauthenticate(credential).await()
+                Log.i(TAG, "confirmEmailUpdate: Re-authentication successful")
+
+                // Refresh user to get latest email verification status
+                user.reload().await()
+
+                // Update email in Firebase Authentication (suppress deprecation warning)
+                @Suppress("DEPRECATION")
+                user.updateEmail(newEmail).await()
+                Log.i(TAG, "confirmEmailUpdate: Email updated successfully in Firebase Auth")
+
+                // Update local profile
+                localRepo.updateEmail(newEmail)
+
+                // Sync to Firestore
+                val profile = localRepo.getCurrentProfile()
+                remoteRepo.saveUserProfile(
+                    profile,
+                    onSuccess = {
+                        Log.i(TAG, "confirmEmailUpdate: Email synced to Firestore")
+                        Toast.makeText(context, "Email updated successfully", Toast.LENGTH_SHORT).show()
+                    },
+                    onError = { e ->
+                        Log.e(
+                            TAG,
+                            "confirmEmailUpdate: Failed to sync email to Firestore, error=${e.message}"
+                        )
+                        Toast.makeText(
+                            context,
+                            "Failed to sync email: ${e.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )
+
+                // Send verification email for the new email (Firebase may mark it as unverified)
+                user.sendEmailVerification().addOnSuccessListener {
+                    Log.i(TAG, "confirmEmailUpdate: Verification email sent to $newEmail")
+                    Toast.makeText(
+                        context,
+                        "A verification email has been sent to $newEmail.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }.addOnFailureListener { e ->
+                    Log.e(TAG, "confirmEmailUpdate: Failed to send verification email, error=${e.message}")
+                    Toast.makeText(
+                        context,
+                        "Failed to send verification email: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "confirmEmailUpdate: error=${e.message}, stacktrace=${e.stackTraceToString()}")
+                val errorMessage = when (e) {
+                    is FirebaseAuthInvalidCredentialsException -> "Incorrect password"
+                    is FirebaseAuthException -> when (e.errorCode) {
+                        "ERROR_REQUIRES_RECENT_LOGIN" -> "Please log out and log in again to update your email."
+                        "ERROR_EMAIL_ALREADY_IN_USE" -> "This email is already in use by another account."
+                        "ERROR_INVALID_EMAIL" -> "Invalid email format."
+                        "ERROR_OPERATION_NOT_ALLOWED" -> "Email updates are not allowed. Please check your Firebase Authentication settings."
+                        else -> "Failed to update email: ${e.message}"
+                    }
+                    else -> "Failed to update email: ${e.message}"
+                }
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    fun getCurrentEmail(): String {
+        return FirebaseAuth.getInstance().currentUser?.email ?: "No email"
+    }
 
     fun toggleNotifications(enabled: Boolean) {
-        repository.toggleNotifications(enabled)
-        // shared prefrences
+        Log.d(TAG, "toggleNotifications: enabled=$enabled")
+        localRepo.toggleNotifications(enabled)
+        syncProfileToFirebase()
+        Log.i(TAG, "toggleNotifications: success")
     }
 
-    fun changePassword() {
-        // Logic to navigate to change password screen or show dialog
-        println("Navigating to Change Password screen")
+    fun toggleTheme() {
+        Log.d(TAG, "toggleTheme")
+        localRepo.toggleTheme()
+        syncProfileToFirebase()
+        Log.i(TAG, "toggleTheme: success")
     }
 
-    fun resetData() {
-        // Reset data And navigate(home screen) and delete tasks & habits
-        println("Resetting app data")
+    fun onImageSelected(uri: Uri, context: Context) {
+        Log.d(TAG, "onImageSelected: uri=$uri")
+        viewModelScope.launch {
+            // Save URI locally using SharedPreferences
+            localRepo.saveProfileImageUri(context, uri.toString())
+            Toast.makeText(context, "Profile picture selected", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun syncProfileToFirebase() {
+        Log.d(TAG, "syncProfileToFirebase")
+        viewModelScope.launch {
+            val profile = localRepo.getCurrentProfile()
+            remoteRepo.saveUserProfile(
+                profile,
+                onSuccess = { Log.i(TAG, "syncProfileToFirebase: success") },
+                onError = { e -> Log.e(TAG, "syncProfileToFirebase: error=${e.message}") }
+            )
+        }
+    }
+
+    fun changePasswordWithVerification(
+        context: Context,
+        oldPassword: String,
+        newPassword: String,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        Log.d(TAG, "changePasswordWithVerification")
+        viewModelScope.launch {
+            try {
+                val user = FirebaseAuth.getInstance().currentUser
+                val email = user?.email ?: throw IllegalStateException("User not logged in")
+                // Verify old password
+                FirebaseAuth.getInstance().signInWithEmailAndPassword(email, oldPassword).await()
+                // Update password
+                remoteRepo.changePassword(
+                    newPassword,
+                    onSuccess = {
+                        Log.i(TAG, "changePasswordWithVerification: success")
+                        Toast.makeText(context, "Password changed successfully", Toast.LENGTH_SHORT).show()
+                        onSuccess()
+                    },
+                    onError = { e ->
+                        Log.e(TAG, "changePasswordWithVerification: error=${e.message}")
+                        onError(e)
+                    }
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "changePasswordWithVerification: error=${e.message}")
+                when (e) {
+                    is FirebaseAuthInvalidCredentialsException -> {
+                        Toast.makeText(context, "Incorrect old password", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                        onError(e)
+                    }
+                }
+            }
+        }
     }
 
     fun logout() {
-        // Firebase Logout
-        println("Logging out")
+        Log.d(TAG, "logout")
+        viewModelScope.launch {
+            remoteRepo.logout()
+            Log.i(TAG, "logout: success")
+        }
     }
 
     fun deleteAccount() {
-        // Firebase delete account and Reset data
-        println("Deleting account")
+        Log.d(TAG, "deleteAccount")
+        viewModelScope.launch {
+            try {
+                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
+                // Delete Firestore data
+                FirebaseFirestore.getInstance().collection("users").document(userId).delete()
+                    .await()
+                // Delete Firebase Auth account
+                remoteRepo.deleteAccount(
+                    onSuccess = { Log.i(TAG, "deleteAccount: success") },
+                    onError = { e -> Log.e(TAG, "deleteAccount: error=${e.message}") }
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "deleteAccount: error=${e.message}")
+            }
+        }
     }
 
-    fun editProfile() {
-        // Logic to navigate to edit profile screen
-        println("Navigating to Edit Profile screen")
+    fun resetData() {
+        Log.d(TAG, "resetData")
+        localRepo.updateName("Guest")
+        localRepo.updateEmail("")
+        localRepo.updateProfileImage("")
+        localRepo.toggleNotifications(true)
+        if (isDarkTheme.value) localRepo.toggleTheme()
+        syncProfileToFirebase()
+        Log.i(TAG, "resetData: success")
     }
-
 }

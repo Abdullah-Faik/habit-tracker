@@ -1,10 +1,11 @@
 package com.fola.habit_tracker.ui.main.profileScreen
 
-import androidx.annotation.DrawableRes
-import androidx.compose.ui.graphics.vector.ImageVector
 
 data class UserProfile(
-    val name: String,
-    @DrawableRes val profileImageRes: Int
+    val name: String = "",
+    val email : String = "",
+    val Password: String = "",
+    val profileImageUri: String = "",
+    val notificationsEnabled: Boolean = false,
+    val darkTheme: Boolean = false
 )
-

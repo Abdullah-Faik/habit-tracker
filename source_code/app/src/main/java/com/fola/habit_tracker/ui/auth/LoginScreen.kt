@@ -51,6 +51,7 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     onCreateAccount: () -> Unit = {},
     onForgetPassword: () -> Unit = {},
+    onLoginSuccess: () -> Unit,
     loginViewmodel: LoginViewmodel = viewModel()
 ) {
     val loginState = loginViewmodel.uiState.collectAsState()
@@ -117,7 +118,13 @@ fun LoginScreen(
                 )
 
                 StyledButton(
-                    onClick = { loginViewmodel.signIn() },
+                    onClick = {
+                        loginViewmodel.signIn(
+                            onSuccess = {
+                                onLoginSuccess() // ✅ هنا نذهب إلى MainApp بعد نجاح تسجيل الدخول
+                            }
+                        )
+                    },
                     text = "Sign In"
                 )
             }
@@ -230,5 +237,5 @@ fun SocialLoginButton(
 @Preview
 @Composable
 private fun LoginPrev() {
-    LoginScreen()
+   // LoginScreen()
 }

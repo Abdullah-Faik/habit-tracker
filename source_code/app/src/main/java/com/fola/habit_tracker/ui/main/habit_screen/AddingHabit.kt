@@ -22,8 +22,8 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.fola.habit_tracker.ui.components.interFont
-import com.fola.habit_tracker.ui.task_screen.TaskNavigation
 import com.fola.habit_tracker.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,7 +87,7 @@ fun AddingHabitScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
             Box {
                 Spacer(modifier = Modifier.height(16.dp))
-                Divider(
+                HorizontalDivider(
                     color = Color(0xff333232),
                     thickness = 1.dp,
                     modifier = Modifier.fillMaxWidth()
@@ -123,7 +122,7 @@ fun AddingHabitScreen(navController: NavController) {
             }
             Box {
                 Spacer(modifier = Modifier.height(16.dp))
-                Divider(
+                HorizontalDivider(
                     color = Color(0xff333232),
                     thickness = 1.dp,
                     modifier = Modifier.fillMaxWidth()
@@ -162,7 +161,7 @@ fun AddingHabitScreen(navController: NavController) {
             // Note section
             Box {
                 Spacer(modifier = Modifier.height(16.dp))
-                Divider(
+                HorizontalDivider(
                     color = Color(0xff333232),
                     thickness = 1.dp,
                     modifier = Modifier.fillMaxWidth()
@@ -202,7 +201,7 @@ fun AddingHabitScreen(navController: NavController) {
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            Divider(
+            HorizontalDivider(
                 color = Color.Gray,
                 thickness = 1.dp,
                 modifier = Modifier.padding(vertical = 8.dp)
@@ -214,7 +213,7 @@ fun AddingHabitScreen(navController: NavController) {
             ) {
                 Box(modifier = Modifier, contentAlignment = Alignment.Center) {
                     TextButton(onClick = {
-                        navController.popBackStack() // Pop back to TaskScreen
+                        navController.popBackStack() // Pop back to HabitMainContent
                     }) {
                         Text(
                             "Cancel",
@@ -227,7 +226,7 @@ fun AddingHabitScreen(navController: NavController) {
                 Box(modifier = Modifier, contentAlignment = Alignment.Center) {
                     TextButton(onClick = {
                         // TODO: Save task logic here
-                        navController.popBackStack() // Pop back to TaskScreen
+                        navController.popBackStack() // Pop back to HabitMainContent
                     }) {
                         Text(
                             "Confirm",
@@ -246,7 +245,7 @@ fun AddingHabitScreen(navController: NavController) {
 @Composable
 fun AddingTaskLightPrev() {
     AppTheme {
-        AddingHabitScreen(navController = rememberNavController()) // CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
+        AddingHabitScreen(navController = rememberNavController())
     }
 }
 
@@ -254,6 +253,6 @@ fun AddingTaskLightPrev() {
 @Composable
 private fun AddingTaskDarkPrev() {
     AppTheme {
-        AddingHabitScreen(navController = rememberNavController()) // CHANGED: Use TaskNavigation to ensure NavController is linked to NavHost
+        AddingHabitScreen(navController = rememberNavController())
     }
 }

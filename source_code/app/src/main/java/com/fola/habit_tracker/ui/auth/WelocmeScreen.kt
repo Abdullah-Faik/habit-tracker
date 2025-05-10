@@ -94,4 +94,8 @@ fun WelcomeScreen(
 @Preview
 @Composable
 private fun WelcomePrev() {
+    WelcomeScreen(
+        modifier = Modifier,
+        onStartButton = {}
+    )
 }
