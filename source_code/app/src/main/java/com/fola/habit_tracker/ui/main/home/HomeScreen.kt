@@ -1,6 +1,7 @@
 package com.fola.habit_tracker.ui.main.home
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,6 +44,7 @@ import com.fola.habit_tracker.data.database.Habit
 import com.fola.habit_tracker.ui.components.icons.PlusSmall
 import com.fola.habit_tracker.ui.components.mainFont
 import com.fola.habit_tracker.ui.theme.AppTheme
+import kotlinx.coroutines.flow.flow
 import java.time.LocalDate
 
 
@@ -56,10 +58,9 @@ fun HomeScreen(
     val habits = viewModel.habits.collectAsState()
     val dailyHabit = viewModel.dailyHabits.collectAsState()
     val day = viewModel.day.collectAsState()
-    var showCalendar by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.surface,
         floatingActionButton = {
             Icon(
                 imageVector = PlusSmall,
@@ -79,69 +80,22 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
         ) {
-            if (showCalendar) {
-                CalenderPicker(
-                    onConfirm = { showCalendar = false },
-                    onDismiss = { showCalendar = false },
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .padding(
-                        horizontal = 16.dp,
-                        vertical = 24.dp
-                    )
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.avatar),
-                        contentDescription = "avatar",
-                        Modifier
-                            .size(98.dp)
-                    )
-                    Text(
-                        text = "HI, Name \uD83D\uDC4B\uD83C\uDFFB",
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = mainFont,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 20.sp
-                    )
-                }
-                IconButton(
-                    onClick = {
-                        Log.d("calendar", "clicked")
-                        showCalendar = !showCalendar
-                    },
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                        .size(52.dp)
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.calendar),
-                        contentDescription = "ca`lender",
-                        Modifier.size(36.dp)
-                    )
-                }
-            }
+            ProfileCard()
             DateRow(
                 modifier = Modifier
                     .padding(vertical = 4.dp),
                 onCardPress = {
-                    Log.d("card", "day is $it")
-                    viewModel.getDayHabit(it)
-                }
+                    viewModel.setCurrentDate(it)
+                },
+                selectedDay = day.value.dayId
             )
-            ProgressCard(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+            ProgressCard(
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                progress =  viewModel.getDayProgress(day.value.dayId),
+                allTasks = habits.value.habits.size,
+                completedTask = viewModel.getCompletedHabit()
+            )
 
             LazyColumn(
                 modifier = Modifier
@@ -149,12 +103,14 @@ fun HomeScreen(
                     .padding(horizontal = 8.dp),
             ) {
                 items(items = habits.value.habits, key = { it.id }) { habit ->
-                    Log.d("prgress",viewModel.getDailyHabitProgress(
-                        dayId = day.value.dayId,
-                        habitId = habit.id
-                    ).collectAsState(initial = 0f).value.toString())
+                    Log.d(
+                        "prgress", viewModel.getDailyHabitProgress(
+                            dayId = day.value.dayId,
+                            habitId = habit.id
+                        ).collectAsState(initial = 0f).value.toString()
+                    )
                     TasksCard(
-                        modifier = Modifier.padding(vertical = 2.dp),
+                        modifier = Modifier,
                         habit = habit,
                         progress = viewModel.getDailyHabitProgress(
                             dayId = day.value.dayId,
@@ -163,7 +119,10 @@ fun HomeScreen(
                         onClickable = {
                             Log.d("clicking", "clicked")
                             viewModel.removeDailyHabit(LocalDate.now(), habit.id)
-                        }
+                        },
+                        onIncrease = {},
+                        onDecrease = {},
+                        onDone ={},
                     )
                 }
 
@@ -184,7 +143,7 @@ fun HomeScreenPreview() {
 
 @Preview(
     showBackground = true,
-    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+    uiMode = Configuration.UI_MODE_NIGHT_YES
 )
 @Composable
 fun HomeScreenDarkPreview() {

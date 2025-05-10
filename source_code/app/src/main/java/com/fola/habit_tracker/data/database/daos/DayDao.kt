@@ -25,4 +25,8 @@ interface DayDao {
     @Query("SELECT * FROM day where day_id = :id")
     fun getHabits(id: LocalDate): Flow<DayWithHabits>
 
+    @Query("select progress from day where day_id = :id")
+    fun getDayProgress(id: LocalDate) : Flow<Float>
+
+
 }

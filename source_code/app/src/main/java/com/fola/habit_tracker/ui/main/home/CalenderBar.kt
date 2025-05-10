@@ -31,7 +31,11 @@ import java.util.Locale
 
 
 @Composable
-fun DateRow(modifier: Modifier = Modifier, onCardPress: (LocalDate) -> Unit = {}) {
+fun DateRow(
+    modifier: Modifier = Modifier,
+    onCardPress: (LocalDate) -> Unit = {},
+    selectedDay: LocalDate
+) {
 
     val listState = rememberLazyListState()
     val today = LocalDate.now()
@@ -59,8 +63,8 @@ fun DateRow(modifier: Modifier = Modifier, onCardPress: (LocalDate) -> Unit = {}
                 isCurrentDay = date == today,
                 onCardPress = {
                     onCardPress(date)
-                }
-
+                },
+                isSelectedDay = date == selectedDay
             )
         }
     }
@@ -72,7 +76,8 @@ fun DateDayCard(
     dayNumber: String = "",
     dayName: String = "",
     isCurrentDay: Boolean = false,
-    onCardPress: () -> Unit = {}
+    onCardPress: () -> Unit = {},
+    isSelectedDay: Boolean
 ) {
     Box(
         Modifier
@@ -80,7 +85,7 @@ fun DateDayCard(
             .clip(RoundedCornerShape(16.dp))
             .clickable { onCardPress() }
             .border(
-                width = if (isCurrentDay) (1.5).dp else (-1).dp,
+                width = if (isSelectedDay) (1.5).dp else (-1).dp,
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.primary
             )
@@ -114,12 +119,16 @@ fun DateDayCard(
 @Composable
 private fun DataRowPrev() {
     AppTheme {
-        DateRow()
+        DateRow(selectedDay = LocalDate.now())
     }
 }
 
 @Preview
 @Composable
 private fun DateCardPrev() {
-    DateDayCard()
+    AppTheme {
+
+        DateRow(selectedDay = LocalDate.now())
+    }
+
 }

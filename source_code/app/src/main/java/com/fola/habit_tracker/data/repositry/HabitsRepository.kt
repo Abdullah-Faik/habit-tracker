@@ -33,6 +33,8 @@ interface HabitsRepository {
 
 
     fun getDailyHabitProgress(dayId: LocalDate, habitId: Long) : Flow<Float>
+    fun getDayProgress(dayId: LocalDate): Flow<Float>
+    suspend fun getDay(dayId: LocalDate) : Day?
 }
 
 
@@ -92,6 +94,14 @@ class DataBaseHabitsRepository(
         dailyHabitsDao.deleteDailyHabit(dayId, habitId)
         Log.d("clicking", "clicked")
         habitDao.removeHabit(habitId)
+    }
+
+    override fun getDayProgress(dayId: LocalDate) : Flow<Float> {
+        return daysDao.getDayProgress(dayId)
+    }
+
+    override suspend fun getDay(dayId: LocalDate): Day? {
+        return daysDao.getDay(dayId)
     }
 
 
