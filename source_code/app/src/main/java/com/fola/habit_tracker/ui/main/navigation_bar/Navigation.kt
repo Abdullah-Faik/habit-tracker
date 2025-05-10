@@ -1,5 +1,6 @@
 package com.fola.habit_tracker.ui.main.navigation_bar
 
+import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -7,6 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModel
@@ -15,29 +19,52 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.timerscreen.timer_screen.SetTimerScreen
-import com.fola.habit_tracker.ui.main.calender.CalenderScreen
+import com.fola.habit_tracker.ui.auth.AuthNavigation
 import com.fola.habit_tracker.ui.main.habit_screen.HabitScreen
 import com.fola.habit_tracker.ui.main.home.HomeScreen
 import com.fola.habit_tracker.ui.main.profileScreen.LocalProfileRepository
 import com.fola.habit_tracker.ui.main.profileScreen.ProfileScreen
 import com.fola.habit_tracker.ui.main.profileScreen.ProfileViewModel
 import com.fola.habit_tracker.ui.main.profileScreen.RemoteProfileRepository
+import com.fola.habit_tracker.ui.main.timer_screen.SetTimerScreen
 import com.fola.habit_tracker.ui.main.timer_screen.TimerScreen
 import com.fola.habit_tracker.ui.main.timer_screen.TimerViewModel
 import com.fola.habit_tracker.ui.theme.AppTheme
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @Composable
-fun MainApp(modifier: Modifier = Modifier) {
+fun EntryPoint(modifier: Modifier = Modifier, navigateToRoute: String? = null) {
+    AppTheme {
+        // Track if the user is logged in and email-verified
+        val isLoggedIn = remember {
+            mutableStateOf(
+                Firebase.auth.currentUser?.isEmailVerified == true
+            )
+        }
+        if (isLoggedIn.value) {
+            // Show main app with navigation for authenticated users
+            MainApp(modifier = modifier, navigateToRoute = navigateToRoute)
+        } else {
+            // Show authentication screens for unauthenticated users
+            AuthNavigation(
+                onAuthSuccess = {
+                    isLoggedIn.value = true
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun MainApp(modifier: Modifier = Modifier, navigateToRoute: String? = null) {
     val navController = rememberNavController()
-    val timerViewModel: TimerViewModel = viewModel() // Shared TimerViewModel
+    val timerViewModel: TimerViewModel = viewModel()
 
     Scaffold(
         modifier = modifier.fillMaxWidth(),
         bottomBar = {
-            BottomNavigationBar(
-                navController = navController
-            )
+            BottomNavigationBar(navController = navController)
         }
     ) { innerPadding ->
         NavHost(
@@ -45,8 +72,12 @@ fun MainApp(modifier: Modifier = Modifier) {
             startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Home.route) { HomeScreen() }
-            composable(Screen.Habit.route) { HabitScreen(navController) }
+            composable(Screen.Home.route) {
+                HomeScreen()
+            }
+            composable(Screen.Habit.route) {
+                HabitScreen(navController)
+            }
             composable(Screen.Timer.route) {
                 SetTimerScreen(
                     navController = navController,
@@ -62,7 +93,7 @@ fun MainApp(modifier: Modifier = Modifier) {
             ) {
                 TimerScreen(
                     viewModel = timerViewModel,
-                    navController = navController // Pass NavController to TimerScreen
+                    navController = navController
                 )
             }
             composable(Screen.Profile.route) {
@@ -74,7 +105,20 @@ fun MainApp(modifier: Modifier = Modifier) {
                         }
                     }
                 )
-                ProfileScreen()
+                ProfileScreen(viewModel = viewModel)
+            }
+        }
+
+        // Handle navigation from notifications
+        LaunchedEffect(navigateToRoute) {
+            navigateToRoute?.let { route ->
+                if (route == "timer") {
+                    Log.d("MainApp", "Navigating to timer route from notification")
+                    navController.navigate(Screen.Timer.route) {
+                        popUpTo(navController.graph.startDestinationId)
+                        launchSingleTop = true
+                    }
+                }
             }
         }
     }

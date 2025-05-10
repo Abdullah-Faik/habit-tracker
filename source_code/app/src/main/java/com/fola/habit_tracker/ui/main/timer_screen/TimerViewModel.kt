@@ -35,33 +35,31 @@ class TimerViewModel : ViewModel() {
 
         countdownJob?.cancel()
         countdownJob = viewModelScope.launch {
-            val startTime = System.currentTimeMillis()
-            val endTime = startTime + _timerState.value.remainingTime
-
-            while (System.currentTimeMillis() < endTime) {
-                if (!_timerState.value.isRunning) continue
-
-                val currentTime = System.currentTimeMillis()
-                val remaining = endTime - currentTime
-
-                _timerState.value = _timerState.value.copy(
-                    remainingTime = remaining,
-                    progress = (_totalDuration - remaining).toFloat() / _totalDuration
-                )
-
-                kotlinx.coroutines.delay(16)
+            var remaining = _timerState.value.remainingTime
+            while (remaining > 0 && _timerState.value.isRunning) {
+                kotlinx.coroutines.delay(1000) // Update every second
+                if (_timerState.value.isRunning) {
+                    remaining -= 1000
+                    _timerState.value = _timerState.value.copy(
+                        remainingTime = remaining.coerceAtLeast(0),
+                        progress = (_totalDuration - remaining).toFloat() / _totalDuration
+                    )
+                }
             }
-
-            _timerState.value = _timerState.value.copy(
-                isRunning = false,
-                remainingTime = 0,
-                progress = 1f
-            )
+            if (remaining <= 0) {
+                _timerState.value = _timerState.value.copy(
+                    isRunning = false,
+                    remainingTime = 0,
+                    progress = 1f
+                )
+            }
         }
     }
 
     fun pauseTimer() {
-        _timerState.value = _timerState.value.copy(isRunning = false)
+        if (_timerState.value.isRunning) {
+            _timerState.value = _timerState.value.copy(isRunning = false)
+        }
     }
 
     fun resumeTimer() {
@@ -86,6 +84,7 @@ class TimerViewModel : ViewModel() {
     }
 
     fun resetTimer() {
+        countdownJob?.cancel()
         _timerState.value = TimerState(
             remainingTime = _totalDuration,
             progress = 0f,

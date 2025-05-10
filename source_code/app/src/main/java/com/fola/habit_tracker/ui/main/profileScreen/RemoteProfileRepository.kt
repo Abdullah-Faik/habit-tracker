@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
 class RemoteProfileRepository {
+
     private val TAG = "RemoteProfileRepo"
     private val firestore = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance().reference

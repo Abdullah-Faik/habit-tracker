@@ -1,5 +1,6 @@
-package com.example.timerscreen.timer_screen
+package com.fola.habit_tracker.ui.main.timer_screen
 
+import android.util.Log
 import android.widget.NumberPicker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,7 +35,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.fola.habit_tracker.R
-import com.fola.habit_tracker.ui.main.timer_screen.TimerViewModel
 
 @Composable
 fun SetTimerScreen(navController: NavController, viewModel: TimerViewModel) {
@@ -101,7 +101,7 @@ fun SetTimerScreen(navController: NavController, viewModel: TimerViewModel) {
                     minutes = 0
                     seconds = 0
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4DB6AC)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF177882)),
                 shape = RoundedCornerShape(16),
                 modifier = Modifier.weight(1f)
             ) {
@@ -112,10 +112,15 @@ fun SetTimerScreen(navController: NavController, viewModel: TimerViewModel) {
 
             Button(
                 onClick = {
-                    viewModel.setTotalDuration(totalMillis)
-                    navController.navigate("timer_screen")
+                    if (totalMillis > 0) {
+                        Log.d("SetTimerScreen", "Setting duration: $totalMillis ms")
+                        viewModel.setTotalDuration(totalMillis)
+                        navController.navigate("timer_screen")
+                    } else {
+                        Log.w("SetTimerScreen", "Invalid duration: $totalMillis ms, navigation skipped")
+                    }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4DB6AC)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF177882)),
                 shape = RoundedCornerShape(16),
                 modifier = Modifier.weight(1f),
                 enabled = totalMillis > 0

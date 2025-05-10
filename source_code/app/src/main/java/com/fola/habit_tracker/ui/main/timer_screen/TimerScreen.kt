@@ -1,9 +1,20 @@
 package com.fola.habit_tracker.ui.main.timer_screen
 
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.MediaPlayer
+import android.os.Build
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,11 +23,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -31,14 +47,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -51,46 +73,99 @@ fun TimerScreen(viewModel: TimerViewModel, navController: NavController) {
     val timerState by viewModel.timerState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    // State to track if the sound has been played
-    var hasPlayedSound by remember { mutableStateOf(false) }
+    // State to track notification and dialog
+    var showDialog by remember { mutableStateOf(false) }
+    var hasNotificationPermission by remember { mutableStateOf(checkNotificationPermission(context)) }
 
-    // Initialize MediaPlayer for the timer end sound
-    val mediaPlayer = remember {
-        MediaPlayer.create(context, R.raw.timer_end).apply {
-            setOnCompletionListener {
-                it.release() // Release MediaPlayer after playback
-            }
-        }
+    // MediaPlayer for timer completion sound
+    var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
+
+    // Request POST_NOTIFICATIONS permission for Android 13+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        Log.d("TimerScreen", "POST_NOTIFICATIONS permission granted: $isGranted")
+        hasNotificationPermission = isGranted
     }
-
-    // Clean up MediaPlayer when the composable is disposed
-    DisposableEffect(Unit) {
-        onDispose {
-            mediaPlayer?.release()
-        }
-    }
-
-    // Start the timer automatically when the screen is first composed
     LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !hasNotificationPermission) {
+            launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    // Create Notification Channel
+    LaunchedEffect(Unit) {
+        createNotificationChannel(context)
+    }
+
+    // Start the timer and foreground service automatically
+    LaunchedEffect(timerState.totalDuration) {
         if (!timerState.isRunning && timerState.remainingTime > 0) {
+            Log.d("TimerScreen", "Starting timer with duration: ${timerState.totalDuration} ms")
             viewModel.startTimer()
+            try {
+                context.startService(Intent(context, TimerForegroundService::class.java).apply {
+                    action = TimerForegroundService.ACTION_START
+                    putExtra(TimerForegroundService.EXTRA_DURATION, timerState.totalDuration)
+                })
+            } catch (e: Exception) {
+                Log.e("TimerScreen", "Failed to start TimerForegroundService: ${e.message}")
+            }
+        } else {
+            Log.w("TimerScreen", "Service not started: isRunning=${timerState.isRunning}, remainingTime=${timerState.remainingTime}")
         }
     }
 
     // Observe remaining time to detect when the timer ends
     LaunchedEffect(timerState.remainingTime) {
         if (timerState.remainingTime <= 0 && timerState.totalDuration > 0) {
-            // Timer has ended
-            if (!hasPlayedSound) {
-                mediaPlayer?.start() // Play the sound
-                hasPlayedSound = true // Prevent playing multiple times
-            }
-            // Navigate back to SetTimerScreen
-            navController.navigate("timer") {
-                popUpTo("timer") { inclusive = true }
-                launchSingleTop = true
+            showDialog = true
+            // Play sound when timer completes in foreground
+            if (mediaPlayer == null) {
+                try {
+                    mediaPlayer = MediaPlayer.create(context, R.raw.timer_end)?.apply {
+                        setOnCompletionListener {
+                            it.release()
+                            mediaPlayer = null
+                            Log.d("TimerScreen", "MediaPlayer released after completion")
+                        }
+                        start()
+                        Log.d("TimerScreen", "Playing timer end sound")
+                    }
+                } catch (e: Exception) {
+                    Log.e("TimerScreen", "Failed to play timer end sound: ${e.message}")
+                }
             }
         }
+    }
+
+    // Clean up MediaPlayer when composable is disposed
+    DisposableEffect(Unit) {
+        onDispose {
+            mediaPlayer?.release()
+            mediaPlayer = null
+            Log.d("TimerScreen", "MediaPlayer released on dispose")
+        }
+    }
+
+    // Dialog for timer completion
+    if (showDialog) {
+        TimerCompleteDialog(
+            onDismiss = {
+                showDialog = false
+                viewModel.resetTimer()
+                try {
+                    context.startService(Intent(context, TimerForegroundService::class.java).apply {
+                        action = TimerForegroundService.ACTION_STOP
+                    })
+                } catch (e: Exception) {
+                    Log.e("TimerScreen", "Failed to stop TimerForegroundService: ${e.message}")
+                }
+                navController.navigate("timer") {
+                    launchSingleTop = true
+                }
+            },
+            viewModel = viewModel,
+            navController = navController
+        )
     }
 
     Surface(
@@ -120,37 +195,182 @@ fun TimerScreen(viewModel: TimerViewModel, navController: NavController) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = {
-                        viewModel.stopTimer()
-                        viewModel.resetTimer()
-                        hasPlayedSound = false // Reset sound state
-                        navController.navigate("timer") {
-                            popUpTo("timer") { inclusive = true }
-                            launchSingleTop = true
-                        }
-                    }) {
-                        Icon(imageVector = Icons.Default.Stop, contentDescription = "Stop", tint = Color(0xFF4DB6AC))
+                    IconButton(
+                        onClick = {
+                            viewModel.stopTimer()
+                            viewModel.resetTimer()
+                            showDialog = false
+                            try {
+                                context.startService(Intent(context, TimerForegroundService::class.java).apply {
+                                    action = TimerForegroundService.ACTION_STOP
+                                })
+                            } catch (e: Exception) {
+                                Log.e("TimerScreen", "Failed to stop TimerForegroundService: ${e.message}")
+                            }
+                            navController.navigate("timer") {
+                                launchSingleTop = true
+                            }
+                        },
+                        modifier = Modifier
+                            .size(56.dp)
+                            .background(Color(0xFF177882), RoundedCornerShape(16.dp))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Stop,
+                            contentDescription = "Stop",
+                            tint = Color.White
+                        )
                     }
-                    IconButton(onClick = {
-                        viewModel.restartTimer()
-                        hasPlayedSound = false // Reset sound state
-                    }) {
-                        Icon(imageVector = Icons.Default.Replay, contentDescription = "Restart", tint = Color(0xFF4DB6AC))
+                    IconButton(
+                        onClick = {
+                            viewModel.restartTimer()
+                            showDialog = false
+                            try {
+                                context.startService(Intent(context, TimerForegroundService::class.java).apply {
+                                    action = TimerForegroundService.ACTION_START
+                                    putExtra(TimerForegroundService.EXTRA_DURATION, timerState.totalDuration)
+                                })
+                            } catch (e: Exception) {
+                                Log.e("TimerScreen", "Failed to restart TimerForegroundService: ${e.message}")
+                            }
+                        },
+                        modifier = Modifier
+                            .size(56.dp)
+                            .background(Color(0xFF177882), RoundedCornerShape(16.dp))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Replay,
+                            contentDescription = "Restart",
+                            tint = Color.White
+                        )
                     }
-                    IconButton(onClick = {
-                        if (timerState.isRunning) viewModel.pauseTimer() else viewModel.resumeTimer()
-                        hasPlayedSound = false // Reset sound state
-                    }) {
+                    IconButton(
+                        onClick = {
+                            if (timerState.isRunning) {
+                                viewModel.pauseTimer()
+                                try {
+                                    context.startService(
+                                        Intent(
+                                            context,
+                                            TimerForegroundService::class.java
+                                        ).apply {
+                                            action = TimerForegroundService.ACTION_STOP
+                                        })
+                                } catch (e: Exception) {
+                                    Log.e(
+                                        "TimerScreen",
+                                        "Failed to stop TimerForegroundService on pause: ${e.message}"
+                                    )
+                                }
+                            } else {
+                                viewModel.resumeTimer()
+                                try {
+                                    context.startService(
+                                        Intent(
+                                            context,
+                                            TimerForegroundService::class.java
+                                        ).apply {
+                                            action = TimerForegroundService.ACTION_START
+                                            putExtra(
+                                                TimerForegroundService.EXTRA_DURATION,
+                                                timerState.remainingTime
+                                            )
+                                        })
+                                } catch (e: Exception) {
+                                    Log.e(
+                                        "TimerScreen",
+                                        "Failed to start TimerForegroundService on resume: ${e.message}"
+                                    )
+                                }
+                            }
+                            showDialog = false
+                        },
+                        modifier = Modifier
+                            .size(56.dp)
+                            .background(Color(0xFF177882), RoundedCornerShape(16.dp))
+                    ) {
                         Icon(
                             imageVector = if (timerState.isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
                             contentDescription = if (timerState.isRunning) "Pause" else "Play",
-                            tint = Color(0xFF4DB6AC)
+                            tint = Color.White
                         )
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+fun TimerCompleteDialog(
+    onDismiss: () -> Unit,
+    viewModel: TimerViewModel,
+    navController: NavController
+) {
+    AlertDialog(
+        onDismissRequest = { /* Prevent dismissing by clicking outside */ },
+        modifier = Modifier
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(Color(0xFF4DB6AC), Color(0xFF177882)),
+                    start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                    end = androidx.compose.ui.geometry.Offset(0f, 400f)
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(16.dp),
+        confirmButton = {},
+        dismissButton = {},
+        title = {
+            Text(
+                text = "Timer Complete!",
+                color = Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.yoga_girl),
+                    contentDescription = "Yoga Girl",
+                    modifier = Modifier
+                        .size(150.dp)
+                        .padding(bottom = 16.dp)
+                )
+                Text(
+                    text = "Great job! Your timer has finished.",
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                Button(
+                    onClick = {
+                        onDismiss()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF121212)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Text(
+                        text = "Stop",
+                        color = Color(0xFF4DB6AC),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        },
+        containerColor = Color.Transparent
+    )
 }
 
 @Composable
@@ -161,11 +381,11 @@ fun TimerProgress(
     modifier: Modifier = Modifier,
     indicatorColor: Color = Color(0xFF4DB6AC),
     trackColor: Color = Color(0xFF2D3748),
-    strokeWidth: Dp = 12.dp
+    strokeWidth: Dp = 16.dp
 ) {
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
-        animationSpec = androidx.compose.animation.core.tween(300)
+        animationSpec = androidx.compose.animation.core.tween(500)
     )
 
     Box(
@@ -183,13 +403,31 @@ fun TimerProgress(
             )
         }
         Canvas(modifier = Modifier.fillMaxSize()) {
+            val gradientBrush = Brush.linearGradient(
+                colors = listOf(
+                    indicatorColor,
+                    Color(0xFF80CBC4)
+                ),
+                start = center,
+                end = center.copy(y = size.height)
+            )
             drawArc(
-                color = indicatorColor,
+                brush = gradientBrush,
                 startAngle = -90f,
                 sweepAngle = 360f * animatedProgress,
                 useCenter = false,
                 style = Stroke(width = strokeWidth.toPx(), cap = StrokeCap.Round),
                 size = Size(size.width, size.height)
+            )
+        }
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawArc(
+                color = Color.Black.copy(alpha = 0.1f),
+                startAngle = -90f,
+                sweepAngle = 360f,
+                useCenter = false,
+                style = Stroke(width = (strokeWidth + 2.dp).toPx(), cap = StrokeCap.Round),
+                size = Size(size.width - 4.dp.toPx(), size.height - 4.dp.toPx())
             )
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -200,7 +438,7 @@ fun TimerProgress(
             )
             Text(
                 text = "Total ${TimeUnit.MILLISECONDS.toMinutes(totalDuration)} minutes",
-                color = Color.White,
+                color = Color.White.copy(alpha = 0.7f),
                 fontSize = 16.sp,
                 modifier = Modifier.padding(top = 16.dp)
             )
@@ -221,8 +459,49 @@ fun formatMillisToTime(millis: Long): String {
     }
 }
 
+private fun createNotificationChannel(context: Context) {
+    try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Timer Notifications"
+            val descriptionText = "Notifications for timer completion"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel("TIMER_CHANNEL_ID", name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager: NotificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    } catch (e: Exception) {
+        Log.e("TimerScreen", "Failed to create notification channel: ${e.message}")
+    }
+}
+
+private fun checkNotificationPermission(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val granted = ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+        Log.d("TimerScreen", "POST_NOTIFICATIONS permission: $granted")
+        granted
+    } else {
+        true
+    }
+}
+
 @Preview
 @Composable
 fun TimerScreenPreview(modifier: Modifier = Modifier) {
     TimerScreen(viewModel = viewModel(), navController = rememberNavController())
+}
+
+@Preview
+@Composable
+fun TimerCompleteDialogPreview() {
+    TimerCompleteDialog(
+        onDismiss = {},
+        viewModel = viewModel(),
+        navController = rememberNavController()
+    )
 }
