@@ -101,7 +101,7 @@ fun SetTimerScreen(navController: NavController, viewModel: TimerViewModel) {
                     minutes = 0
                     seconds = 0
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4DB6AC)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF177882)),
                 shape = RoundedCornerShape(16),
                 modifier = Modifier.weight(1f)
             ) {
@@ -120,7 +120,7 @@ fun SetTimerScreen(navController: NavController, viewModel: TimerViewModel) {
                         Log.w("SetTimerScreen", "Invalid duration: $totalMillis ms, navigation skipped")
                     }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4DB6AC)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF177882)),
                 shape = RoundedCornerShape(16),
                 modifier = Modifier.weight(1f),
                 enabled = totalMillis > 0

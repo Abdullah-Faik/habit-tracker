@@ -55,6 +55,9 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
 ) {
+
+    
+
     val habits = viewModel.habits.collectAsState()
     val dailyHabit = viewModel.dailyHabits.collectAsState()
     val day = viewModel.day.collectAsState()

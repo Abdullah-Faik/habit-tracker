@@ -8,6 +8,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -29,6 +30,7 @@ class TimerForegroundService : Service() {
     private var timerJob: Job? = null
     private lateinit var viewModel: TimerViewModel
     private var isServiceRunning = false
+    private var mediaPlayer: MediaPlayer? = null
 
     companion object {
         const val ACTION_START = "com.fola.habit_tracker.ACTION_START"
@@ -43,6 +45,17 @@ class TimerForegroundService : Service() {
         try {
             viewModel = TimerViewModel()
             createNotificationChannel()
+            // Initialize MediaPlayer for timer end sound
+            mediaPlayer = MediaPlayer.create(this, R.raw.timer_end)?.apply {
+                setOnCompletionListener {
+                    it.release()
+                    mediaPlayer = null
+                    Log.d("TimerForegroundService", "MediaPlayer released after completion")
+                }
+            } ?: run {
+                Log.e("TimerForegroundService", "Failed to initialize MediaPlayer for timer_end")
+                null
+            }
         } catch (e: Exception) {
             Log.e("TimerForegroundService", "Failed to initialize service: ${e.message}")
         }
@@ -53,7 +66,7 @@ class TimerForegroundService : Service() {
             when (intent?.action) {
                 ACTION_START -> {
                     if (!isServiceRunning) {
-                        val duration = intent.getLongExtra(EXTRA_DURATION, 60000L) // Default 1 minute
+                        val duration = intent.getLongExtra(EXTRA_DURATION, 60000L)
                         Log.d("TimerForegroundService", "Received duration: $duration ms")
                         viewModel.setTotalDuration(duration)
                         startForegroundService()
@@ -79,13 +92,12 @@ class TimerForegroundService : Service() {
             Log.d("TimerForegroundService", "POST_NOTIFICATIONS permission: $granted")
             granted
         } else {
-            true // Permission not required below Android 13
+            true
         }
     }
 
     private fun startForegroundService() {
         try {
-            // Start the timer if not already running and duration is valid
             if (!viewModel.timerState.value.isRunning && viewModel.timerState.value.remainingTime > 0) {
                 Log.d("TimerForegroundService", "Starting timer with remaining time: ${viewModel.timerState.value.remainingTime}")
                 viewModel.startTimer()
@@ -93,7 +105,6 @@ class TimerForegroundService : Service() {
                 Log.w("TimerForegroundService", "Timer not started: isRunning=${viewModel.timerState.value.isRunning}, remainingTime=${viewModel.timerState.value.remainingTime}")
             }
 
-            // Start foreground with initial notification if permission is granted
             if (checkNotificationPermission()) {
                 startForeground(NOTIFICATION_ID, buildNotification(viewModel.timerState.value.remainingTime))
             } else {
@@ -102,12 +113,11 @@ class TimerForegroundService : Service() {
                 return
             }
 
-            // Update notification with remaining time and send completion notification when done
             timerJob = coroutineScope.launch {
                 viewModel.timerState.collect { state ->
                     if (state.isRunning && state.remainingTime > 0) {
                         updateNotification(state.remainingTime)
-                        delay(1000) // Update every second
+                        delay(1000)
                     } else if (state.remainingTime <= 0 && state.totalDuration > 0) {
                         if (checkNotificationPermission()) {
                             try {
@@ -118,6 +128,34 @@ class TimerForegroundService : Service() {
                             }
                         } else {
                             Log.w("TimerForegroundService", "Cannot send completion notification: POST_NOTIFICATIONS permission denied")
+                        }
+                        try {
+                            mediaPlayer?.start() ?: run {
+                                // Reinitialize MediaPlayer if it was released
+                                mediaPlayer =
+                                    MediaPlayer.create(this@TimerForegroundService, R.raw.timer_end)
+                                        ?.apply {
+                                            setOnCompletionListener {
+                                                it.release()
+                                                mediaPlayer = null
+                                                Log.d(
+                                                    "TimerForegroundService",
+                                                    "MediaPlayer reinitialized and released after completion"
+                                                )
+                                            }
+                                            start()
+                                        }
+                                Log.w(
+                                    "TimerForegroundService",
+                                    "MediaPlayer was null, reinitialized for timer end sound"
+                                )
+                            }
+                            Log.d("TimerForegroundService", "Playing timer end sound")
+                        } catch (e: Exception) {
+                            Log.e(
+                                "TimerForegroundService",
+                                "Failed to play timer end sound: ${e.message}"
+                            )
                         }
                         stopForegroundService()
                     }
@@ -137,6 +175,9 @@ class TimerForegroundService : Service() {
             timerJob?.cancel()
             viewModel.stopTimer()
             isServiceRunning = false
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
+            mediaPlayer = null
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
         } catch (e: Exception) {
@@ -147,6 +188,7 @@ class TimerForegroundService : Service() {
     private fun createNotificationChannel() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // Channel for ongoing timer notification
                 val name = "Timer Foreground Service"
                 val descriptionText = "Shows timer progress in the foreground"
                 val importance = NotificationManager.IMPORTANCE_LOW
@@ -156,6 +198,19 @@ class TimerForegroundService : Service() {
                 val notificationManager: NotificationManager =
                     getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.createNotificationChannel(channel)
+
+                // Channel for timer completion with sound and vibration
+                val completionChannel = NotificationChannel(
+                    "TIMER_CHANNEL_ID",
+                    "Timer Notifications",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Notifications for timer completion"
+                    enableLights(true)
+                    lightColor = android.graphics.Color.GREEN
+                    enableVibration(true)
+                }
+                notificationManager.createNotificationChannel(completionChannel)
             }
         } catch (e: Exception) {
             Log.e("TimerForegroundService", "Failed to create notification channel: ${e.message}")
@@ -166,6 +221,7 @@ class TimerForegroundService : Service() {
         try {
             val intent = Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                putExtra("navigate_to", "timer")
             }
             val pendingIntent = PendingIntent.getActivity(
                 this,
@@ -185,7 +241,7 @@ class TimerForegroundService : Service() {
             )
 
             return NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.yoga_girl) // Fallback to android.R.drawable.ic_dialog_alert if missing
+                .setSmallIcon(R.drawable.yoga_girl)
                 .setContentTitle("Timer Running")
                 .setContentText("Time remaining: ${formatMillisToTime(remainingTime)}")
                 .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -195,7 +251,6 @@ class TimerForegroundService : Service() {
                 .build()
         } catch (e: Exception) {
             Log.e("TimerForegroundService", "Failed to build notification: ${e.message}")
-            // Fallback notification
             return NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_dialog_alert)
                 .setContentTitle("Timer Running")
@@ -225,7 +280,7 @@ class TimerForegroundService : Service() {
         try {
             val intent = Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                putExtra("navigate_to", "timer") // Flag to navigate to SetTimerScreen
+                putExtra("navigate_to", "timer")
             }
             val pendingIntent = PendingIntent.getActivity(
                 this,
@@ -234,13 +289,14 @@ class TimerForegroundService : Service() {
                 PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
             )
 
-            val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.yoga_girl) // Fallback to android.R.drawable.ic_dialog_alert if missing
+            val builder = NotificationCompat.Builder(this, "TIMER_CHANNEL_ID")
+                .setSmallIcon(R.drawable.yoga_girl)
                 .setContentTitle("Timer Complete")
                 .setContentText("Your timer has finished!")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
+                .setDefaults(NotificationCompat.DEFAULT_SOUND or NotificationCompat.DEFAULT_VIBRATE) // Add default sound and vibration
 
             with(NotificationManagerCompat.from(this)) {
                 notify(1, builder.build())
@@ -257,6 +313,9 @@ class TimerForegroundService : Service() {
         try {
             coroutineScope.cancel()
             isServiceRunning = false
+            mediaPlayer?.release()
+            mediaPlayer = null
+            Log.d("TimerForegroundService", "Service destroyed, MediaPlayer released")
         } catch (e: Exception) {
             Log.e("TimerForegroundService", "Error in onDestroy: ${e.message}")
         }
