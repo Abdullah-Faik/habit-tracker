@@ -38,16 +38,15 @@ enum class Screen(
     Home("home", R.drawable.home_icon, "Home"),
     Habit("habit", R.drawable.tasks, "Habit"),
     Timer("timer", R.drawable.timer_icon, "Timer"),
-    Profile("profile", R.drawable.profile_icon, "Profile"),
-    Calendar("calendar", R.drawable.calendar, "Calendar"),
+    Profile("profile", R.drawable.profile_icon, "Profile")
 }
 
 
 private val bottomNavigationScreens = listOf(
+    Screen.Home,
     Screen.Habit,
     Screen.Timer,
-    Screen.Home,
-    Screen.Calendar,
+
     Screen.Profile
 )
 

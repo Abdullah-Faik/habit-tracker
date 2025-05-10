@@ -49,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.fola.habit_tracker.data.database.Habit
 import com.fola.habit_tracker.data.database.RepeatedType
 import com.fola.habit_tracker.ui.components.interFont
@@ -59,6 +60,7 @@ import com.fola.habit_tracker.ui.theme.AppTheme
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AddingHabitScreen(
+    navController: NavController,
     viewModel: AddingHabitsViewmodel = viewModel(
         factory = provideAddingHabitsViewModelFactory(LocalContext.current.applicationContext as Application)
     ),
@@ -286,8 +288,7 @@ fun AddingHabitScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Box(modifier = Modifier, contentAlignment = Alignment.Center) {
-                    TextButton(onClick = {
-                    }) {
+                    TextButton(onClick = { navController.popBackStack() }) {
                         Text(
                             "Cancel",
                             color = Color.LightGray,
@@ -298,7 +299,9 @@ fun AddingHabitScreen(
                 }
                 Box(modifier = Modifier, contentAlignment = Alignment.Center) {
                     TextButton(onClick = {
-                        viewModel.confirmationButton()
+                        if (viewModel.confirmationButton())
+                            navController.popBackStack()
+
                     }) {
                         Text(
                             "Confirm",

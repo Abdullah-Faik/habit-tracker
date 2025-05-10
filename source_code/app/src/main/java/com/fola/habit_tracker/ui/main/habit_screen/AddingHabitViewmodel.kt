@@ -113,16 +113,16 @@ class AddingHabitsViewmodel(private val repository: DataBaseHabitsRepository) : 
         )
     }
 
-    fun confirmationButton() {
+    fun confirmationButton() : Boolean {
         if (_habit.value.title.isBlank()) {
             _isTitleError.value = true
-            return
+            return false
         } else if (_habit.value.unit.isBlank()) {
             _isUnitError.value = true
-            return
+            return false
         } else if (_habit.value.timesOfUnit.equals(0)) {
             _isQuantityError.value = true
-            return
+            return false
         } else {
             viewModelScope.launch {
                 repository.addNewHabit(
@@ -131,8 +131,8 @@ class AddingHabitsViewmodel(private val repository: DataBaseHabitsRepository) : 
                 repository.addNewDailyHabit(
                     _habit.value
                 )
-                Log.d("habit", repository.getActiveHabit().toString())
             }
+            return true
         }
     }
 

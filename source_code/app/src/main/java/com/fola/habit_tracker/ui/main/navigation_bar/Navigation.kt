@@ -65,7 +65,6 @@ fun MainApp(modifier: Modifier = Modifier) {
                     navController = navController // Pass NavController to TimerScreen
                 )
             }
-            composable(Screen.Calendar.route) { CalenderScreen() }
             composable(Screen.Profile.route) {
                 val viewModel: ProfileViewModel = viewModel(
                     factory = object : ViewModelProvider.Factory {

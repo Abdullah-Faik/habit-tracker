@@ -33,7 +33,7 @@ fun AuthNavigation(modifier: Modifier = Modifier, onAuthSuccess: () -> Unit) {
                     }
                 },
                 onLoginSuccess = {
-                    onAuthSuccess()
+                    onAuthSuccess() // ✅ هنا ننتقل إلى MainApp بعد نجاح تسجيل الدخول
                 }
 
             )
