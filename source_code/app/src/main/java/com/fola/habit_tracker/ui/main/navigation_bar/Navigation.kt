@@ -15,7 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.timerscreen.timer_screen.SetTimerScreen
+import com.fola.habit_tracker.ui.main.timer_screen.SetTimerScreen // Updated import
 import com.fola.habit_tracker.ui.main.calender.CalenderScreen
 import com.fola.habit_tracker.ui.main.habit_screen.HabitScreen
 import com.fola.habit_tracker.ui.main.home.HomeScreen
@@ -62,7 +62,7 @@ fun MainApp(modifier: Modifier = Modifier) {
             ) {
                 TimerScreen(
                     viewModel = timerViewModel,
-                    navController = navController // Pass NavController to TimerScreen
+                    navController = navController
                 )
             }
             composable(Screen.Profile.route) {

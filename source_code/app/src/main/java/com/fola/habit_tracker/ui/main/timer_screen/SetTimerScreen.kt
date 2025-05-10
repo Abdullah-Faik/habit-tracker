@@ -1,4 +1,4 @@
-package com.example.timerscreen.timer_screen
+package com.fola.habit_tracker.ui.main.timer_screen
 
 import android.widget.NumberPicker
 import androidx.compose.foundation.background
@@ -34,7 +34,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.fola.habit_tracker.R
-import com.fola.habit_tracker.ui.main.timer_screen.TimerViewModel
 
 @Composable
 fun SetTimerScreen(navController: NavController, viewModel: TimerViewModel) {

@@ -23,7 +23,6 @@ class MainActivity : ComponentActivity() {
                         Firebase.auth.currentUser?.isEmailVerified == true
                     )
                 }
-
                 if (isLoggedIn.value) {
                     MainApp()
                 } else {
