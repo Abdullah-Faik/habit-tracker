@@ -3,15 +3,16 @@ package com.fola.habit_tracker.ui.main.profileScreen
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.compose.runtime.Composable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class LocalProfileRepository {
+object LocalProfileRepository {
     private val TAG = "LocalProfileRepo"
 
     private val _userProfile = MutableStateFlow(
         UserProfile(
-            name = "",
+            name = "Guest User",
             email = "",
             profileImageUri = "",
             Password = "",
@@ -27,7 +28,7 @@ class LocalProfileRepository {
     private val _isDarkTheme = MutableStateFlow(false)
     val isDarkTheme = _isDarkTheme.asStateFlow()
 
-    fun getSharedPreferences(context: Context = getApplicationContext()): SharedPreferences {
+    private fun getSharedPreferences(context: Context = getApplicationContext()): SharedPreferences {
         return context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
     }
 
@@ -42,30 +43,60 @@ class LocalProfileRepository {
     }
 
     fun loadProfileImageUri(context: Context) {
-        Log.d(TAG, "loadProfileImageUri")
-        val sharedPreferences = getSharedPreferences(context)
-        val savedUri = sharedPreferences.getString("profile_image_uri", "")
-        if (savedUri != null) {
-            Log.i(TAG, "loadProfileImageUri: Restoring URI=$savedUri")
-            _userProfile.value = _userProfile.value.copy(profileImageUri = savedUri)
+        try {
+            val sharedPreferences = getSharedPreferences(context)
+            val savedUri = sharedPreferences.getString("profile_image_uri", "") ?: ""
+            val savedName = sharedPreferences.getString("profile_name", "Guest User") ?: "Guest User"
+            Log.i(TAG, "loadProfileImageUri: Restoring URI=$savedUri, Name=$savedName")
+            _userProfile.value = _userProfile.value.copy(
+                profileImageUri = savedUri,
+                name = savedName
+            )
+            // Verify the saved URI is actually stored
+            val verifiedUri = sharedPreferences.getString("profile_image_uri", null)
+            Log.d(TAG, "loadProfileImageUri: Verified URI in SharedPreferences=$verifiedUri")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading profile image", e)
+            _userProfile.value = _userProfile.value.copy(profileImageUri = "")
         }
     }
 
     fun saveProfileImageUri(context: Context, uri: String) {
         Log.d(TAG, "saveProfileImageUri: uri=$uri")
-        val sharedPreferences = getSharedPreferences(context)
-        with(sharedPreferences.edit()) {
-            putString("profile_image_uri", uri)
-            apply()
+        if (uri.isNotEmpty()) {
+            try {
+                val sharedPreferences = getSharedPreferences(context)
+                with(sharedPreferences.edit()) {
+                    putString("profile_image_uri", uri)
+                    val saved = commit() // Use commit() for synchronous save
+                    Log.i(TAG, "saveProfileImageUri: Save to SharedPreferences successful=$saved")
+                }
+                _userProfile.value = _userProfile.value.copy(profileImageUri = uri)
+                // Verify the save
+                val verifiedUri = sharedPreferences.getString("profile_image_uri", null)
+                Log.d(TAG, "saveProfileImageUri: Verified URI in SharedPreferences=$verifiedUri")
+            } catch (e: Exception) {
+                Log.e(TAG, "saveProfileImageUri: Failed to save URI", e)
+            }
+        } else {
+            Log.w(TAG, "saveProfileImageUri: Empty URI provided, skipping save")
         }
-        _userProfile.value = _userProfile.value.copy(profileImageUri = uri)
-        Log.i(TAG, "saveProfileImageUri: success")
     }
 
     fun updateName(name: String) {
         Log.d(TAG, "updateName: name=$name")
-        _userProfile.value = _userProfile.value.copy(name = name)
-        Log.i(TAG, "updateName: success")
+        try {
+            val context = getApplicationContext()
+            val sharedPreferences = getSharedPreferences(context)
+            with(sharedPreferences.edit()) {
+                putString("profile_name", name)
+                commit()
+            }
+            _userProfile.value = _userProfile.value.copy(name = name)
+            Log.i(TAG, "updateName: success")
+        } catch (e: Exception) {
+            Log.e(TAG, "updateName: Failed to save name", e)
+        }
     }
 
     fun updateEmail(newEmail: String) {
@@ -103,7 +134,12 @@ class LocalProfileRepository {
     fun getCurrentProfile(): UserProfile {
         Log.d(TAG, "getCurrentProfile")
         val profile = _userProfile.value
-        Log.i(TAG, "getCurrentProfile: success")
+        Log.i(TAG, "getCurrentProfile: success, profileImageUri=${profile.profileImageUri}")
         return profile
     }
+}
+
+@Composable
+fun rememberProfileRepository(): LocalProfileRepository {
+    return LocalProfileRepository
 }

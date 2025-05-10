@@ -12,10 +12,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -36,17 +34,14 @@ import com.google.firebase.auth.auth
 @Composable
 fun EntryPoint(modifier: Modifier = Modifier, navigateToRoute: String? = null) {
     AppTheme {
-        // Track if the user is logged in and email-verified
         val isLoggedIn = remember {
             mutableStateOf(
                 Firebase.auth.currentUser?.isEmailVerified == true
             )
         }
         if (isLoggedIn.value) {
-            // Show main app with navigation for authenticated users
             MainApp(modifier = modifier, navigateToRoute = navigateToRoute)
         } else {
-            // Show authentication screens for unauthenticated users
             AuthNavigation(
                 onAuthSuccess = {
                     isLoggedIn.value = true
@@ -59,7 +54,7 @@ fun EntryPoint(modifier: Modifier = Modifier, navigateToRoute: String? = null) {
 @Composable
 fun MainApp(modifier: Modifier = Modifier, navigateToRoute: String? = null) {
     val navController = rememberNavController()
-    val timerViewModel: TimerViewModel = viewModel()
+    val timerViewModel: TimerViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
     Scaffold(
         modifier = modifier.fillMaxWidth(),
@@ -97,11 +92,14 @@ fun MainApp(modifier: Modifier = Modifier, navigateToRoute: String? = null) {
                 )
             }
             composable(Screen.Profile.route) {
-                val viewModel: ProfileViewModel = viewModel(
+                val viewModel: ProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
                     factory = object : ViewModelProvider.Factory {
                         @Suppress("UNCHECKED_CAST")
                         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                            return ProfileViewModel(LocalProfileRepository(), RemoteProfileRepository()) as T
+                            return ProfileViewModel(
+                                localRepo = LocalProfileRepository,
+                                remoteRepo = RemoteProfileRepository()
+                            ) as T
                         }
                     }
                 )
@@ -109,7 +107,6 @@ fun MainApp(modifier: Modifier = Modifier, navigateToRoute: String? = null) {
             }
         }
 
-        // Handle navigation from notifications
         LaunchedEffect(navigateToRoute) {
             navigateToRoute?.let { route ->
                 if (route == "timer") {
@@ -121,13 +118,5 @@ fun MainApp(modifier: Modifier = Modifier, navigateToRoute: String? = null) {
                 }
             }
         }
-    }
-}
-
-@Preview
-@Composable
-private fun MainAppPrev() {
-    AppTheme {
-        MainApp()
     }
 }
