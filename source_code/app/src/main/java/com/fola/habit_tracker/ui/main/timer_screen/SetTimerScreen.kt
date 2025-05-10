@@ -1,5 +1,6 @@
 package com.fola.habit_tracker.ui.main.timer_screen
 
+import android.util.Log
 import android.widget.NumberPicker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -111,8 +112,13 @@ fun SetTimerScreen(navController: NavController, viewModel: TimerViewModel) {
 
             Button(
                 onClick = {
-                    viewModel.setTotalDuration(totalMillis)
-                    navController.navigate("timer_screen")
+                    if (totalMillis > 0) {
+                        Log.d("SetTimerScreen", "Setting duration: $totalMillis ms")
+                        viewModel.setTotalDuration(totalMillis)
+                        navController.navigate("timer_screen")
+                    } else {
+                        Log.w("SetTimerScreen", "Invalid duration: $totalMillis ms, navigation skipped")
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4DB6AC)),
                 shape = RoundedCornerShape(16),
