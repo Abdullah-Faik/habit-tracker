@@ -7,12 +7,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fola.habit_tracker.HabitApplication
-import com.fola.habit_tracker.data.data_base.Day
-import com.fola.habit_tracker.data.data_base.DayWithHabits
-import com.fola.habit_tracker.data.data_base.Habit
+import com.fola.habit_tracker.data.database.DailyHabits
+import com.fola.habit_tracker.data.database.Day
+import com.fola.habit_tracker.data.database.DayWithHabits
+import com.fola.habit_tracker.data.database.Habit
 import com.fola.habit_tracker.data.repositry.DataBaseHabitsRepository
 import com.fola.habit_tracker.data.repositry.HabitsRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,8 +24,16 @@ import java.time.LocalDate
 
 class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel() {
 
-    private val _dailyHabits = MutableStateFlow(DayWithHabits(Day(LocalDate.now()), emptyList()))
-    val habits: StateFlow<DayWithHabits> = _dailyHabits.asStateFlow()
+    private val _dayWithHabits = MutableStateFlow(DayWithHabits(Day(LocalDate.now()), emptyList()))
+    val habits: StateFlow<DayWithHabits> = _dayWithHabits.asStateFlow()
+
+
+    private val _dailyHabits = MutableStateFlow(DailyHabits())
+    val dailyHabits: StateFlow<DailyHabits> = _dailyHabits.asStateFlow()
+
+    private val _day = MutableStateFlow(Day())
+    val day: StateFlow<Day> = _day.asStateFlow()
+
 
     init {
         getDayHabit()
@@ -34,7 +44,7 @@ class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel(
             habitsRepository.initNewDay(LocalDate.now())
             habitsRepository.getDailyHabits(dayId).collect { dailyHabits ->
                 withContext(Dispatchers.Main) {
-                    _dailyHabits.value = dailyHabits
+                    _dayWithHabits.value = dailyHabits
                 }
             }
         }
@@ -42,6 +52,7 @@ class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel(
 
     fun addNewHabit(habit: Habit) {
         viewModelScope.launch(Dispatchers.IO) {
+            habitsRepository.addNewHabit(habit)
             habitsRepository.addNewDailyHabit(habit)
         }
     }
@@ -50,6 +61,13 @@ class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             habitsRepository.deleteHabit(dayId, habitId)
         }
+    }
+
+
+
+
+    fun getDailyHabitProgress(dayId: LocalDate , habitId: Long) : Flow<Float> {
+        return habitsRepository.getDailyHabitProgress(dayId, habitId)
     }
 
 

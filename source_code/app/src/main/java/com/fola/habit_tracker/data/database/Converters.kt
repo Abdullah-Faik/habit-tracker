@@ -1,4 +1,4 @@
-package com.fola.habit_tracker.data.data_base
+package com.fola.habit_tracker.data.database
 
 import androidx.room.TypeConverter
 import java.time.LocalDate
@@ -35,25 +35,45 @@ class Converters {
 
     //convertDateAndTime
     @TypeConverter
-    fun fromReminderTime(time: LocalTime): Int {
+    fun fromStartTime(time: LocalTime): Int {
         return (time.hour * 100 + time.minute)
     }
 
     @TypeConverter
-    fun toReminderTime(time: Int): LocalTime {
+    fun toStartTime(time: Int): LocalTime {
         return LocalTime.of(time / 100, time % 100)
     }
 
     // Convert LocalDate to String
     @TypeConverter
-    fun fromLocalDate(date: LocalDate?): String? {
-        return date?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    fun fromLocalDate(date: LocalDate): String {
+        return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     }
 
     // Convert String to LocalDate
     @TypeConverter
-    fun toLocalDate(dateString: String?): LocalDate? {
-        return dateString?.let { LocalDate.parse(it, DateTimeFormatter.ofPattern("yyyy-MM-dd")) }
+    fun toLocalDate(dateString: String): LocalDate {
+        return   LocalDate.parse(dateString, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    }
+
+    @TypeConverter
+    fun fromIntList(list: List<Int>?): String {
+        return list?.joinToString(",") ?: ""
+    }
+
+    @TypeConverter
+    fun toIntList(data: String?): List<Int> {
+        return data?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
+    }
+
+    @TypeConverter
+    fun fromIntSet(set: Set<Int>?): String {
+        return set?.joinToString(",") ?: ""
+    }
+
+    @TypeConverter
+    fun toIntSet(data: String?): MutableSet<Int> {
+        return data?.split(",")?.mapNotNull { it.toIntOrNull() }?.toMutableSet() ?: mutableSetOf<Int>()
     }
 
 }

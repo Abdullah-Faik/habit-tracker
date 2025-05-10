@@ -1,12 +1,10 @@
-package com.fola.habit_tracker.data.data_base.daos
+package com.fola.habit_tracker.data.database.daos
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
-import com.fola.habit_tracker.data.data_base.Habit
+import com.fola.habit_tracker.data.database.Habit
 import kotlinx.coroutines.flow.Flow
 
 
@@ -18,7 +16,7 @@ interface HabitsDao {
     @Query("SELECT * FROM habit WHERE is_removed = 0")
     fun getActiveHabitsFlow(): Flow<List<Habit>>
 
-    @Query("SELECT * FROM habit WHERE is_removed = 0 and repeated_type != 'TASK'")
+    @Query("SELECT * FROM habit WHERE is_removed = 0 and repeated_type != 'ONCE'")
     suspend fun getActiveHabits(): List<Habit>
 
     @Query("select * FROM habit Where habit.habit_id =(:id)")
