@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -28,22 +27,19 @@ class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel(
     private val _dayWithHabits = MutableStateFlow(DayWithHabits(Day(LocalDate.now()), emptyList()))
     val habits: StateFlow<DayWithHabits> = _dayWithHabits.asStateFlow()
 
+
     private val _dailyHabits = MutableStateFlow(DailyHabits())
     val dailyHabits: StateFlow<DailyHabits> = _dailyHabits.asStateFlow()
 
-    private val _day = MutableStateFlow(Day(LocalDate.now()))
+    private val _day = MutableStateFlow(Day())
     val day: StateFlow<Day> = _day.asStateFlow()
 
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
-            _day.collect {
-                getDayHabit(it.dayId)
-            }
-        }
+        getDayHabit()
     }
 
-    fun getDayHabit(dayId: LocalDate = _day.value.dayId) {
+    fun getDayHabit(dayId: LocalDate = LocalDate.now()) {
         viewModelScope.launch(Dispatchers.IO) {
             habitsRepository.initNewDay(LocalDate.now())
             habitsRepository.getDailyHabits(dayId).collect { dailyHabits ->
@@ -53,13 +49,6 @@ class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel(
             }
         }
     }
-
-    fun setCurrentDay(dayId: LocalDate) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _day.value = Day(dayId)
-        }
-    }
-
 
     fun addNewHabit(habit: Habit) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -74,12 +63,10 @@ class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel(
         }
     }
 
-    fun getDayProgress(dayId: LocalDate): Flow<Float> {
-        return habitsRepository.getDayProgress(dayId)
-    }
 
 
-    fun getDailyHabitProgress(dayId: LocalDate, habitId: Long): Flow<Float> {
+
+    fun getDailyHabitProgress(dayId: LocalDate , habitId: Long) : Flow<Float> {
         return habitsRepository.getDailyHabitProgress(dayId, habitId)
     }
 

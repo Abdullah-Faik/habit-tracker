@@ -1,6 +1,5 @@
 package com.fola.habit_tracker.ui.main.home
 
-import com.fola.habit_tracker.data.database.Day
 import com.fola.habit_tracker.data.database.DayWithHabits
 import com.fola.habit_tracker.data.database.Habit
 import com.fola.habit_tracker.data.database.RepeatedType
@@ -49,14 +48,6 @@ class FakeHabitsRepository : HabitsRepository {
     }
 
     override fun getDailyHabitProgress(dayId: LocalDate, habitId: Long): Flow<Float> {
-        TODO("Not yet implemented")
-    }
-
-    override fun getDayProgress(dayId: LocalDate): Flow<Float> {
-        return flowOf(0f)
-    }
-
-    override suspend fun getDay(dayId: LocalDate): Day? {
         TODO("Not yet implemented")
     }
 

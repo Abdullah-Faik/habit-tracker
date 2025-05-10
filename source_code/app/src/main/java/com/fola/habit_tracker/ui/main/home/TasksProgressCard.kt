@@ -12,33 +12,26 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fola.habit_tracker.ui.theme.AppTheme
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 
 @Composable
-fun ProgressCard(
-    modifier: Modifier = Modifier,
-    progress : Flow<Float>
-) {
-
-    val _progress = progress.collectAsState(initial = 0f)
+fun ProgressCard(modifier: Modifier = Modifier) {
 
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .shadow(8.dp)
-            .background(color = MaterialTheme.colorScheme.surfaceContainerHighest),
+            .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
+
+        ,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -47,18 +40,17 @@ fun ProgressCard(
 
             CircularProgressIndicator(
                 progress = {
-                    _progress.value
+                    .2f
                 },
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = Color.White,
                 modifier = Modifier
                     .padding(8.dp)
                     .size(72.dp),
-                strokeWidth = 6.dp,
-                strokeCap = StrokeCap.Round
+                strokeWidth = 6.dp
             )
             Text(
-                text = "${(_progress.value * 100).toInt()}%",
+                text = "20%",
                 modifier = Modifier.padding(16.dp),
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -82,7 +74,7 @@ fun ProgressCard(
 @Composable
 private fun ProgressCardView() {
     AppTheme {
-        ProgressCard(progress = flow { emit(0f) })
+        ProgressCard()
     }
 }
 
@@ -93,6 +85,6 @@ private fun ProgressCardView() {
 @Composable
 private fun ProgressCardDarkView() {
     AppTheme {
-        ProgressCard(progress = flow { emit(0f) })
+        ProgressCard()
     }
 }
