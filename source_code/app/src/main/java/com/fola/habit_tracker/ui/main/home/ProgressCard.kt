@@ -1,5 +1,6 @@
 package com.fola.habit_tracker.ui.main.home
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,26 +13,36 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fola.habit_tracker.ui.theme.AppTheme
+import kotlinx.coroutines.flow.Flow
+import androidx.compose.runtime.getValue
+import kotlinx.coroutines.flow.flow
 
 @Composable
-fun ProgressCard(modifier: Modifier = Modifier) {
+fun ProgressCard(
+    modifier: Modifier = Modifier,
+    progress: Flow<Float>,
+    allTasks : Int = 0,
+    completedTask : Flow<Int>
+) {
+    val _progress by progress.collectAsState(0f)
+    val _completed by completedTask.collectAsState(0)
 
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .shadow(8.dp)
-            .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
-
-        ,
+            .background(color = MaterialTheme.colorScheme.surfaceContainerHighest),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -40,17 +51,18 @@ fun ProgressCard(modifier: Modifier = Modifier) {
 
             CircularProgressIndicator(
                 progress = {
-                    .2f
+                    _progress
                 },
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = Color.White,
                 modifier = Modifier
                     .padding(8.dp)
                     .size(72.dp),
-                strokeWidth = 6.dp
+                strokeWidth = 6.dp,
+                strokeCap = StrokeCap.Round
             )
             Text(
-                text = "20%",
+                text = "${(_progress * 100).toInt()}%",
                 modifier = Modifier.padding(16.dp),
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -61,7 +73,7 @@ fun ProgressCard(modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                "1 of 5 Completed",
+                "$_completed of $allTasks Completed",
                 color = MaterialTheme.colorScheme.primary
             )
         }
@@ -74,17 +86,27 @@ fun ProgressCard(modifier: Modifier = Modifier) {
 @Composable
 private fun ProgressCardView() {
     AppTheme {
-        ProgressCard()
+        ProgressCard(
+            modifier = TODO(),
+            progress = TODO(),
+            allTasks = TODO(),
+            completedTask = TODO()
+        )
     }
 }
 
 @Preview(
     showBackground = true,
-    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+    uiMode = Configuration.UI_MODE_NIGHT_YES
 )
 @Composable
 private fun ProgressCardDarkView() {
     AppTheme {
-        ProgressCard()
+        ProgressCard(
+            modifier = TODO(),
+            progress = TODO(),
+            allTasks = TODO(),
+            completedTask = TODO()
+        )
     }
 }
