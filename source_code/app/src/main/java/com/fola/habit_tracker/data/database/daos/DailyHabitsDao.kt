@@ -1,13 +1,11 @@
-package com.fola.habit_tracker.data.data_base.daos
+package com.fola.habit_tracker.data.database.daos
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.fola.habit_tracker.data.data_base.DailyHabits
+import com.fola.habit_tracker.data.database.DailyHabits
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import java.time.LocalDate
 
 
@@ -21,6 +19,9 @@ interface DailyHabitsDao {
 
     @Query("select * FROM daily_habit where day_id = :dayId")
     fun getDailyHabits(dayId: LocalDate): Flow<List<DailyHabits>>
+
+    @Query("select progress from daily_habit where day_id = :dayId and habit_id = :habitId")
+    fun getDailyHabitProgress(dayId: LocalDate, habitId: Long) : Flow<Float>
 
 
     @Query("delete from  daily_habit where day_id =:dayId and habit_id = :habitId")

@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
@@ -45,13 +46,16 @@ import com.fola.habit_tracker.ui.auth.viewmodel.LoginViewmodel
 import com.fola.habit_tracker.ui.components.InputField
 import com.fola.habit_tracker.ui.components.PasswordInputField
 import com.fola.habit_tracker.ui.components.StyledButton
+import com.fola.habit_tracker.ui.main.timer_screen.MyApp
+import com.fola.habit_tracker.ui.theme.AppTheme
 
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
     onCreateAccount: () -> Unit = {},
     onForgetPassword: () -> Unit = {},
-    loginViewmodel: LoginViewmodel = viewModel()
+    loginViewmodel: LoginViewmodel = viewModel(),
+    onLoginSuccess: () -> Unit = {}
 ) {
     val loginState = loginViewmodel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -69,8 +73,8 @@ fun LoginScreen(
             SnackbarHost(snackbarHostState, snackbar = {
                 Snackbar(
                     snackbarData = it,
-                    containerColor = colorResource(R.color.main_color),
-                    contentColor = colorResource(R.color.black),
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 )
 
             })
@@ -79,7 +83,7 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = colorResource(R.color.basic_background))
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(horizontal = 16.dp)
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -88,7 +92,7 @@ fun LoginScreen(
             Text(
                 "Sign in",
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 32.sp,
                 modifier = Modifier.padding(bottom = 48.dp)
             )
@@ -128,7 +132,7 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "Forget Password?",
-                    color = colorResource(R.color.main_color)
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -230,5 +234,5 @@ fun SocialLoginButton(
 @Preview
 @Composable
 private fun LoginPrev() {
-    LoginScreen()
+    AppTheme {  LoginScreen() }
 }

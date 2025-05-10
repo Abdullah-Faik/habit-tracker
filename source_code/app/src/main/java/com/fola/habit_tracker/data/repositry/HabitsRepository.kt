@@ -1,14 +1,14 @@
 package com.fola.habit_tracker.data.repositry
 
-import androidx.media3.common.util.Log
-import com.fola.habit_tracker.data.data_base.DailyHabits
-import com.fola.habit_tracker.data.data_base.Day
-import com.fola.habit_tracker.data.data_base.DayWithHabits
-import com.fola.habit_tracker.data.data_base.Habit
-import com.fola.habit_tracker.data.data_base.HabitDataBase
-import com.fola.habit_tracker.data.data_base.daos.DailyHabitsDao
-import com.fola.habit_tracker.data.data_base.daos.DayDao
-import com.fola.habit_tracker.data.data_base.daos.HabitsDao
+import android.util.Log
+import com.fola.habit_tracker.data.database.DailyHabits
+import com.fola.habit_tracker.data.database.Day
+import com.fola.habit_tracker.data.database.DayWithHabits
+import com.fola.habit_tracker.data.database.Habit
+import com.fola.habit_tracker.data.database.HabitDataBase
+import com.fola.habit_tracker.data.database.daos.DailyHabitsDao
+import com.fola.habit_tracker.data.database.daos.DayDao
+import com.fola.habit_tracker.data.database.daos.HabitsDao
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -29,8 +29,10 @@ interface HabitsRepository {
     //delete habit
     suspend fun deleteHabit(dayId: LocalDate, habitId: Long)
 
-    //getday
+    suspend fun addNewHabit(habit: Habit)
 
+
+    fun getDailyHabitProgress(dayId: LocalDate, habitId: Long) : Flow<Float>
 }
 
 
@@ -46,7 +48,7 @@ class DataBaseHabitsRepository(
         return habitDao.getActiveHabitsFlow()
     }
 
-    private suspend fun getActiveHabit(): List<Habit> {
+    suspend fun getActiveHabit(): List<Habit> {
         return habitDao.getActiveHabits()
     }
 
@@ -63,8 +65,19 @@ class DataBaseHabitsRepository(
     }
 
     override suspend fun addNewDailyHabit(habit: Habit) {
-        habitDao.insertHabit(habit)
         dailyHabitsDao.insertDailyHabit(DailyHabits(id = habit.id))
+    }
+
+    override suspend fun addNewHabit(habit: Habit) {
+        habitDao.insertHabit(habit)
+        if (habit.startDate == LocalDate.now())
+            addNewDailyHabit(habit)
+    }
+
+    override fun getDailyHabitProgress(dayId: LocalDate, habitId: Long): Flow<Float> {
+        return flow {
+            emitAll(dailyHabitsDao.getDailyHabitProgress(dayId,habitId))
+        }
     }
 
     override suspend fun initNewDay(dayId: LocalDate) {

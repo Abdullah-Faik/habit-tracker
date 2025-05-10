@@ -2,8 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp) // ✅ هنا التغيير
     id("com.google.gms.google-services")
-    id("com.google.devtools.ksp")
+
 }
 
 android {
@@ -64,13 +65,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     //extended icons
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation ("androidx.compose.material:material-icons-extended:1.5.4")
     //firebase
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     implementation("com.google.firebase:firebase-auth")
-    //implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-storage-ktx")
     implementation("com.google.firebase:firebase-firestore")
-
+    // Coil for loading images from URL
+    implementation("io.coil-kt:coil-compose:2.4.0")
     //viewmodel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     //navigation
@@ -78,7 +81,13 @@ dependencies {
     //datetime
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.2")
     //room
-    implementation("androidx.room:room-runtime:2.7.0")
-    ksp("androidx.room:room-compiler:2.7.0")
-    implementation("androidx.room:room-ktx:2.7.0")
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
+
+
+
+
+
+
 }

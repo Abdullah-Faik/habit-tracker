@@ -1,12 +1,12 @@
-package com.fola.habit_tracker.data.data_base.daos
+package com.fola.habit_tracker.data.database.daos
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import com.fola.habit_tracker.data.data_base.Day
-import com.fola.habit_tracker.data.data_base.DayWithHabits
+import com.fola.habit_tracker.data.database.Day
+import com.fola.habit_tracker.data.database.DayWithHabits
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
