@@ -35,7 +35,7 @@ fun ProgressCard(
     completedTask : Flow<Int>
 ) {
     val _progress by progress.collectAsState(0f)
-    val _completed by completedTask.collectAsState(0)
+    val _completed by completedTask.collectAsState(0f)
 
     Row(
         modifier = modifier

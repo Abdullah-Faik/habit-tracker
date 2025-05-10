@@ -7,7 +7,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -60,7 +62,7 @@ fun HomeScreen(
     val day = viewModel.day.collectAsState()
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             Icon(
                 imageVector = PlusSmall,
@@ -92,7 +94,7 @@ fun HomeScreen(
             )
             ProgressCard(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-                progress =  viewModel.getDayProgress(day.value.dayId),
+                progress = viewModel.getDayProgress(day.value.dayId),
                 allTasks = habits.value.habits.size,
                 completedTask = viewModel.getCompletedHabit()
             )
@@ -101,29 +103,27 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
+                contentPadding = PaddingValues(vertical = 8.dp)
             ) {
                 items(items = habits.value.habits, key = { it.id }) { habit ->
-                    Log.d(
-                        "prgress", viewModel.getDailyHabitProgress(
-                            dayId = day.value.dayId,
-                            habitId = habit.id
-                        ).collectAsState(initial = 0f).value.toString()
-                    )
-                    TasksCard(
-                        modifier = Modifier,
-                        habit = habit,
-                        progress = viewModel.getDailyHabitProgress(
-                            dayId = day.value.dayId,
-                            habitId = habit.id
-                        ).collectAsState(initial = 0f).value,
-                        onClickable = {
-                            Log.d("clicking", "clicked")
-                            viewModel.removeDailyHabit(LocalDate.now(), habit.id)
-                        },
-                        onIncrease = {},
-                        onDecrease = {},
-                        onDone ={},
-                    )
+                    Box(modifier = Modifier.padding(vertical = 4.dp)) {
+
+                        TasksCard(
+                            modifier = Modifier,
+                            habit = habit,
+                            progress = viewModel.getDailyHabitProgress(
+                                dayId = day.value.dayId,
+                                habitId = habit.id
+                            ),
+                            onClickable = {
+                                Log.d("clicking", "clicked")
+                                viewModel.removeDailyHabit(LocalDate.now(), habit.id)
+                            },
+                            onIncrease = {},
+                            onDecrease = {},
+                            onDone = {},
+                        )
+                    }
                 }
 
             }
