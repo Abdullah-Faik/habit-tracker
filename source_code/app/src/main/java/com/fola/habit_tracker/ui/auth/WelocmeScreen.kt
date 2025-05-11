@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,11 +55,12 @@ fun WelcomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            val myFont = FontFamily(Font(R.font.pacifico_regular))
             Text(
-                text = "BIT FLOW".uppercase(),
+                text = "Bit Flow",
                 color = MaterialTheme.colorScheme.primary,
-                fontSize = 48.sp,
-                fontFamily = interFont,
+                fontSize = 64.sp,
+                fontFamily = myFont,
                 fontWeight = FontWeight.ExtraBold
             )
             Text(

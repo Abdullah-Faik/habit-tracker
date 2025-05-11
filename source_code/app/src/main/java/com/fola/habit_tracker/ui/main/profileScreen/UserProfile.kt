@@ -7,5 +7,5 @@ data class UserProfile(
     val Password: String = "",
     val profileImageUri: String = "",
     val notificationsEnabled: Boolean = false,
-    val darkTheme: Boolean = false
+    val darkTheme: Boolean = true
 )

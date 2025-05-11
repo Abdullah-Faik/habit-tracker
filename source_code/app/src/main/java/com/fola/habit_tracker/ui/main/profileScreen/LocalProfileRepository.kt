@@ -17,7 +17,7 @@ object LocalProfileRepository {
             profileImageUri = "",
             Password = "",
             notificationsEnabled = false,
-            darkTheme = false
+            darkTheme = true
         )
     )
     val userProfile = _userProfile.asStateFlow()
