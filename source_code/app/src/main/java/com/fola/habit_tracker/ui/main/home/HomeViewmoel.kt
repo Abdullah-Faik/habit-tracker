@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -47,15 +48,14 @@ class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel(
         viewModelScope.launch {
             if (habitsRepository.getDay(LocalDate.now()) == null)
                 habitsRepository.initNewDay(LocalDate.now())
-                _day.collect { selectedDay ->
-                    getDayHabit(selectedDay.dayId)
-                }
+            _day.collect { selectedDay ->
+                getDayHabit(selectedDay.dayId)
+            }
         }
     }
 
     fun getDayHabit(dayId: LocalDate = LocalDate.now()) {
         viewModelScope.launch(Dispatchers.IO) {
-
 
 
             habitsRepository.getDailyHabits(dayId).collect { dailyHabits ->
@@ -80,7 +80,7 @@ class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel(
     }
 
 
-    fun getDailyHabitProgress(dayId: LocalDate = _day.value.dayId, habitId: Long): Flow<Float> {
+    fun getDailyHabitProgress(dayId: LocalDate = _day.value.dayId, habitId: Long): Flow<Int> {
         return habitsRepository.getDailyHabitProgress(dayId, habitId)
     }
 
@@ -98,11 +98,42 @@ class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel(
         combine(
             d.habits.map { habit ->
                 habitsRepository.getDailyHabitProgress(_day.value.dayId, habit.id)
+                    .map { progress -> progress to habit.timesOfUnit }
             }
         ) { completions ->
-            completions.count { it >= 1 }.also { total ->
-                Log.d("bla total", total.toString())
+            completions.count { (p, z) -> p >= z }
+        }
+    }
+
+    fun increase(h: Habit) {
+        viewModelScope.launch(Dispatchers.IO) {
+
+            var cProgress = habitsRepository.getDailyHabitProgressInt(LocalDate.now(), h.id)
+            if (_day.value.dayId == LocalDate.now() &&
+                cProgress < h.timesOfUnit
+            ) {
+                cProgress += 1
+                habitsRepository.updateProgress(dayId = LocalDate.now(), habitId = h.id, cProgress)
             }
+        }
+
+    }
+
+    fun deCrease(h: Habit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            var cProgress = habitsRepository.getDailyHabitProgressInt(LocalDate.now(), h.id)
+            if (_day.value.dayId == LocalDate.now() &&
+                cProgress > 0
+            ) {
+                cProgress -= 1
+                habitsRepository.updateProgress(dayId = LocalDate.now(), habitId = h.id, cProgress)
+            }
+        }
+    }
+
+    fun markDone(h: Habit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            habitsRepository.updateProgress(dayId = LocalDate.now(), habitId = h.id, h.timesOfUnit)
         }
     }
 

@@ -113,7 +113,7 @@ class AddingHabitsViewmodel(private val repository: DataBaseHabitsRepository) : 
         )
     }
 
-    fun confirmationButton() : Boolean {
+    fun confirmationButton(): Boolean {
         if (_habit.value.title.isBlank()) {
             _isTitleError.value = true
             return false
@@ -123,12 +123,11 @@ class AddingHabitsViewmodel(private val repository: DataBaseHabitsRepository) : 
         } else if (_habit.value.timesOfUnit.equals(0)) {
             _isQuantityError.value = true
             return false
+        } else if (_habit.value.startDate > _habit.value.endDate) {
+            return false
         } else {
             viewModelScope.launch {
                 repository.addNewHabit(
-                    _habit.value
-                )
-                repository.addNewDailyHabit(
                     _habit.value
                 )
             }
@@ -174,7 +173,8 @@ val habitIcons = listOf(
 )
 
 
-fun provideAddingHabitsViewModelFactory(application: Application
+fun provideAddingHabitsViewModelFactory(
+    application: Application
 ): ViewModelProvider.Factory = viewModelFactory {
     initializer {
         val app = application as HabitApplication

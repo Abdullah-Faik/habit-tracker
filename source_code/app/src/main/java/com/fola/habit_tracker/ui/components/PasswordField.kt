@@ -8,6 +8,9 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -37,7 +40,7 @@ fun PasswordInputField(
     errorMessage: String = ""
 ) {
     var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
-    TextField(
+    OutlinedTextField(
         value = value,
         onValueChange = { newValue -> onValueChange(newValue) },
         placeholder = {
@@ -58,19 +61,7 @@ fun PasswordInputField(
                 )
             }
         } else null,
-        colors = TextFieldDefaults.colors(
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent,
-            errorIndicatorColor = Color.Transparent,
-            errorContainerColor = colorResource(R.color.error_container),
-            focusedContainerColor = Color.White,
-            errorTextColor = Color.Black,//colorResource(R.color.Red),
-            cursorColor = Color.Black,
-            errorLabelColor = Color.Red,
-            errorPlaceholderColor = colorResource(R.color.Red)
-
-        ),
+        colors = TextFieldDefaults.colors(),
         trailingIcon = {
             val image = if (isPasswordVisible)
                 Icons.Filled.Visibility

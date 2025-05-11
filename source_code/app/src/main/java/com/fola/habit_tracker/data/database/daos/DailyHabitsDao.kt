@@ -25,9 +25,17 @@ interface DailyHabitsDao {
     fun getDailyHabits(dayId: LocalDate): Flow<List<DailyHabits>>
 
     @Query("select progress from daily_habit where day_id = :dayId and habit_id = :habitId")
-    fun getDailyHabitProgress(dayId: LocalDate, habitId: Long) : Flow<Float>
+    fun getDailyHabitProgress(dayId: LocalDate, habitId: Long) : Flow<Int>
+
+    @Query("select progress from daily_habit where day_id = :dayId and habit_id = :habitId")
+    fun getDailyHabitProgressInt(dayId: LocalDate, habitId: Long) : Int
+
 
 
     @Query("delete from  daily_habit where day_id =:dayId and habit_id = :habitId")
     fun deleteDailyHabit(dayId: LocalDate, habitId: Long)
+
+
+    @Query("UPDATE daily_habit set progress = :value where day_id = :dayId and habit_id = :habitId")
+    fun setDailyHabitProgress(dayId: LocalDate , habitId: Long, value : Int)
 }

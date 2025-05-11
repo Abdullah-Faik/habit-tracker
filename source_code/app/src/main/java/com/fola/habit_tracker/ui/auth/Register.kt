@@ -18,12 +18,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -45,6 +47,7 @@ import com.fola.habit_tracker.ui.auth.viewmodel.RegisterViewmodel
 import com.fola.habit_tracker.ui.components.InputField
 import com.fola.habit_tracker.ui.components.PasswordInputField
 import com.fola.habit_tracker.ui.components.StyledButton
+import com.fola.habit_tracker.ui.theme.AppTheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,8 +79,8 @@ fun RegisterScreen(
             SnackbarHost(snackbarHostState, snackbar = {
                 Snackbar(
                     snackbarData = it,
-                    containerColor = colorResource(R.color.main_color),
-                    contentColor = colorResource(R.color.black),
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 )
 
             })
@@ -85,6 +88,7 @@ fun RegisterScreen(
         topBar = {
             TopAppBar(
                 title = {},
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 navigationIcon = {
                     Box(
                         Modifier
@@ -100,11 +104,7 @@ fun RegisterScreen(
                             modifier = Modifier.size(56.dp)
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = colorResource(R.color.basic_background)
-                )
-
+                }
             )
         }
 
@@ -114,7 +114,7 @@ fun RegisterScreen(
                 .fillMaxSize()
                 .imePadding()
                 .verticalScroll(rememberScrollState())
-                .background(color = colorResource(R.color.basic_background))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(horizontal = 16.dp, vertical = 32.dp)
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -123,7 +123,7 @@ fun RegisterScreen(
             Text(
                 text = "Create Your Account",
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 32.sp,
                 modifier = Modifier.padding(bottom = 36.dp)
             )
@@ -174,13 +174,12 @@ fun RegisterScreen(
                     "Already have an account?",
                     color = Color.Gray
                 )
-                IconButton(
+                TextButton(
                     onClick = onBackButton,
-                    Modifier.width(IntrinsicSize.Min)
                 ) {
                     Text(
                         text = "Sign In",
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.primary,
                         maxLines = 1
                     )
                 }
@@ -193,5 +192,7 @@ fun RegisterScreen(
 @Preview
 @Composable
 private fun RegisterPrev() {
-    RegisterScreen()
+    AppTheme {
+        RegisterScreen()
+    }
 }

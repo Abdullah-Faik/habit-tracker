@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fola.habit_tracker.R
 import com.fola.habit_tracker.ui.components.interFont
+import com.fola.habit_tracker.ui.theme.AppTheme
 
 @Composable
 fun WelcomeScreen(
@@ -34,7 +36,7 @@ fun WelcomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = colorResource(R.color.basic_background))
+            .background(MaterialTheme.colorScheme.surface)
             .padding(vertical = 100.dp, horizontal = 64.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
@@ -52,15 +54,15 @@ fun WelcomeScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Habit".uppercase(),
-                color = Color.White,
-                fontSize = 64.sp,
+                text = "BIT FLOW".uppercase(),
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 48.sp,
                 fontFamily = interFont,
                 fontWeight = FontWeight.ExtraBold
             )
             Text(
                 text = "Unleash your potential through movement",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Normal,
@@ -94,8 +96,10 @@ fun WelcomeScreen(
 @Preview
 @Composable
 private fun WelcomePrev() {
-    WelcomeScreen(
-        modifier = Modifier,
-        onStartButton = {}
-    )
+    AppTheme {
+        WelcomeScreen(
+            modifier = Modifier,
+            onStartButton = {}
+        )
+    }
 }

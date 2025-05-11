@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import java.time.LocalDate
+import kotlin.math.roundToInt
 
 interface HabitsRepository {
 
@@ -33,9 +34,13 @@ interface HabitsRepository {
     suspend fun addNewHabit(habit: Habit)
 
 
-    fun getDailyHabitProgress(dayId: LocalDate, habitId: Long): Flow<Float>
+    fun getDailyHabitProgress(dayId: LocalDate, habitId: Long): Flow<Int>
+
+    suspend fun getDailyHabitProgressInt(dayId: LocalDate, habitId: Long): Int
+
     fun getDayProgress(dayId: LocalDate): Flow<Float>
     suspend fun getDay(dayId: LocalDate): Day?
+    fun updateProgress(dayId: LocalDate, habitId: Long, value: Int)
 }
 
 
@@ -73,14 +78,19 @@ class DataBaseHabitsRepository(
 
     override suspend fun addNewHabit(habit: Habit) {
         habitDao.insertHabit(habit)
-        if (habit.startDate == LocalDate.now())
+
+        if (habit.startDate == LocalDate.now() && habit.isOnThisDay(LocalDate.now()))
             addNewDailyHabit(habit)
     }
 
-    override fun getDailyHabitProgress(dayId: LocalDate, habitId: Long): Flow<Float> {
+    override fun getDailyHabitProgress(dayId: LocalDate, habitId: Long): Flow<Int> {
         return flow {
             emitAll(dailyHabitsDao.getDailyHabitProgress(dayId, habitId))
         }
+    }
+
+    override suspend fun getDailyHabitProgressInt(dayId: LocalDate, habitId: Long): Int {
+        return dailyHabitsDao.getDailyHabitProgressInt(dayId, habitId)
     }
 
     override suspend fun initNewDay(dayId: LocalDate) {
@@ -94,7 +104,6 @@ class DataBaseHabitsRepository(
 
     override suspend fun deleteHabit(dayId: LocalDate, habitId: Long) {
         dailyHabitsDao.deleteDailyHabit(dayId, habitId)
-        Log.d("clicking", "clicked")
         habitDao.removeHabit(habitId)
     }
 
@@ -104,6 +113,10 @@ class DataBaseHabitsRepository(
 
     override suspend fun getDay(dayId: LocalDate): Day? {
         return daysDao.getDay(dayId)
+    }
+
+    override fun updateProgress(dayId: LocalDate, habitId: Long, value: Int) {
+        dailyHabitsDao.setDailyHabitProgress(dayId, habitId, value)
     }
 
 

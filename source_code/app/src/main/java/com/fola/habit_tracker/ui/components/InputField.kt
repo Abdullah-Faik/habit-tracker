@@ -3,6 +3,8 @@ package com.fola.habit_tracker.ui.components
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -25,7 +27,7 @@ fun InputField(
     uiState: UiState = UiState.IDLE,
     errorText: String = ""
 ) {
-    TextField(
+    OutlinedTextField(
         value = value,
         onValueChange = { newValue -> onValueChange(newValue) },
         placeholder = {
@@ -44,19 +46,7 @@ fun InputField(
                 )
             }
         } else null,
-        colors = TextFieldDefaults.colors(
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent,
-            errorIndicatorColor = Color.Transparent,
-            focusedContainerColor = Color.White,
-            errorContainerColor = colorResource(R.color.error_container),
-            errorTextColor =  Color.Black,//colorResource(R.color.Black),
-            cursorColor = Color.Black,
-            errorLabelColor = Color.Red,
-            errorPlaceholderColor = colorResource(R.color.Red)
-
-        ),
+        colors = TextFieldDefaults.colors(),
         modifier = Modifier
             .fillMaxWidth()
     )

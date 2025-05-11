@@ -13,12 +13,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +39,7 @@ import com.fola.habit_tracker.R
 import com.fola.habit_tracker.ui.auth.viewmodel.ResetPasswordViewmodel
 import com.fola.habit_tracker.ui.components.InputField
 import com.fola.habit_tracker.ui.components.StyledButton
+import com.fola.habit_tracker.ui.theme.AppTheme
 
 @Composable
 fun ResetPasswordScreen(
@@ -87,7 +90,7 @@ fun ResetPasswordScreen(
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .background(color = colorResource(R.color.basic_background))
+                .background(color = MaterialTheme.colorScheme.background)
                 .padding(horizontal = 16.dp, vertical = 36.dp)
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -118,20 +121,18 @@ fun ResetPasswordScreen(
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically
-            )
-            {
+            ) {
                 Text(
                     "Already have an account?",
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onBackground
                 )
-                IconButton(
+                TextButton (
                     onClick = onBackButton,
-                    Modifier.width(IntrinsicSize.Min)
                 ) {
                     Text(
                         text = "Sign In",
-                        color = Color.White,
-                        maxLines = 1
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
                     )
                 }
             }
@@ -145,5 +146,7 @@ fun ResetPasswordScreen(
 @Preview
 @Composable
 private fun ResetPasswordPrev() {
-    ResetPasswordScreen()
+    AppTheme {
+        ResetPasswordScreen()
+    }
 }

@@ -115,9 +115,9 @@ fun HomeScreen(
                                 Log.d("clicking", "clicked")
                                 viewModel.removeDailyHabit(LocalDate.now(), habit.id)
                             },
-                            onIncrease = {},
-                            onDecrease = {},
-                            onDone = {},
+                            onIncrease = {viewModel.increase(it)},
+                            onDecrease = {viewModel.deCrease(it)},
+                            onDone = {viewModel.markDone(it)},
                         )
                     }
                 }

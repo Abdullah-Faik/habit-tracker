@@ -89,4 +89,7 @@ dependencies {
     implementation ("androidx.compose.ui:ui:1.6.8")
     implementation ("androidx.compose.material3:material3:1.2.1")
     implementation ("androidx.compose.foundation:foundation:1.6.8")
+
+    //workmanger
+    implementation("androidx.work:work-runtime-ktx:2.10.1")
 }

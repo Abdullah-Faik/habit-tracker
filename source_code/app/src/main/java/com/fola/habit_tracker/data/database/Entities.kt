@@ -50,7 +50,7 @@ data class DailyHabits(
     @ColumnInfo(name = "habit_id") val id: Long = 0,
     @ColumnInfo(name = "is_done") val isDone: Boolean = false,
 
-    val progress: Float = 0f,
+    val progress: Int = 0,
 )
 
 data class DayWithHabits(

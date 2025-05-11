@@ -1,6 +1,7 @@
 package com.fola.habit_tracker.ui.main.home
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -53,21 +54,22 @@ fun TasksCard(
     modifier: Modifier = Modifier,
     habit: Habit,
     onClickable: () -> Unit = {},
-    progress: Flow<Float>,
-    onIncrease: () -> Unit,
-    onDecrease: () -> Unit,
-    onDone: () -> Unit,
+    progress: Flow<Int>,
+    onIncrease: (Habit) -> Unit,
+    onDecrease: (Habit) -> Unit,
+    onDone: (Habit) -> Unit,
 ) {
-    val prog = progress.collectAsState(0f).value
-    val _progress = (prog * habit.timesOfUnit).roundToInt()
+    val prog = progress.collectAsState(0).value
+
 
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
         elevation = CardDefaults.cardElevation()
     ) {
         Column(
-            modifier = Modifier.padding(vertical = 8.dp),
+            modifier = Modifier
+                .background(SolidColor(Color(habit.color)), alpha = 0.2f)
+                .padding(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Row(
@@ -101,7 +103,7 @@ fun TasksCard(
                         )
 
                         Spacer(Modifier.padding(vertical = 4.dp))
-                        Text("$_progress ${habit.unit} of ${habit.timesOfUnit} done")
+                        Text("$prog ${habit.unit} of ${habit.timesOfUnit} done")
 
                     }
                 }
@@ -111,7 +113,7 @@ fun TasksCard(
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(
-                        progress = { prog },
+                        progress = { (prog.toFloat() / habit.timesOfUnit).toFloat() },
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                         modifier = Modifier
@@ -133,24 +135,24 @@ fun TasksCard(
                 HabitActionButton(
                     modifier
                         .clip(RoundedCornerShape(35)),
-                    onClickable = onDecrease,
-                    Color.Red,
+                    onClickable = { onDecrease(habit) },
+                    Color(0xffe18b8d),
                     minus,
                     ""
                 )
                 HabitActionButton(
                     modifier
                         .clip(RoundedCornerShape(35)),
-                    onClickable = onIncrease,
-                    Color.Cyan,
+                    onClickable = { onIncrease(habit) },
+                    Color(0xff7bf1f3),
                     PlusSmall,
                     ""
                 )
                 HabitActionButton(
                     modifier
                         .clip(RoundedCornerShape(35)),
-                    onClickable = onDone,
-                    Color.Green,
+                    onClickable = { onDone(habit) },
+                    Color(0xff7bf18d),
                     checked,
                     ""
                 )
@@ -184,7 +186,6 @@ fun TasksCard(
 }
 
 
-
 @Composable
 fun HabitActionButton(
     modifier: Modifier = Modifier,
@@ -198,13 +199,17 @@ fun HabitActionButton(
     IconButton(
         onClick = { onClickable() },
         modifier = modifier
-            .background(SolidColor(backGroundColor), alpha = .4f),
+            .background(SolidColor(backGroundColor)),
         enabled = isActive
     ) {
         Icon(
-            icon, contentDescription, modifier = Modifier
-                .clip(RoundedCornerShape(25))
+            icon,
+            contentDescription,
+            modifier = Modifier
+                .clip(RoundedCornerShape(25)),
+            tint = Color.Black
         )
+
     }
 
 

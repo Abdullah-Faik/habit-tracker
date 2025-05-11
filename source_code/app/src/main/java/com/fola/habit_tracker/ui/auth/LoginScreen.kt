@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
@@ -30,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
@@ -45,6 +47,7 @@ import com.fola.habit_tracker.ui.auth.viewmodel.LoginViewmodel
 import com.fola.habit_tracker.ui.components.InputField
 import com.fola.habit_tracker.ui.components.PasswordInputField
 import com.fola.habit_tracker.ui.components.StyledButton
+import com.fola.habit_tracker.ui.theme.AppTheme
 
 @Composable
 fun LoginScreen(
@@ -80,7 +83,7 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = colorResource(R.color.basic_background))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(horizontal = 16.dp)
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -89,8 +92,8 @@ fun LoginScreen(
             Text(
                 "Sign in",
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.White,
-                fontSize = 32.sp,
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 48.sp,
                 modifier = Modifier.padding(bottom = 48.dp)
             )
 
@@ -145,7 +148,7 @@ fun LoginScreen(
 
             Text(
                 "Don't have an account?",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(12.dp)
             )
 
@@ -209,7 +212,8 @@ fun SocialLoginButton(
     Box(
         modifier = Modifier
             .clickable { onClick() }
-            .background(Color.White, RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(vertical = 4.dp)
             .fillMaxWidth(),
         contentAlignment = Alignment.Center,
@@ -237,5 +241,7 @@ fun SocialLoginButton(
 @Preview
 @Composable
 private fun LoginPrev() {
-   // LoginScreen()
+    AppTheme {
+        LoginScreen(onLoginSuccess = {})
+    }
 }
