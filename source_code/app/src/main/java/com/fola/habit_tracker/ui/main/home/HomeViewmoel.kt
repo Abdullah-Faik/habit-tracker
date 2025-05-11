@@ -96,7 +96,7 @@ class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel(
                 habitsRepository.getDailyHabitProgress(_day.value.dayId, habit.id)
             }
         ) { completions ->
-            completions.count { it > 0 }.also { total ->
+            completions.count { it >= 1 }.also { total ->
                 Log.d("bla total", total.toString())
             }
         }
