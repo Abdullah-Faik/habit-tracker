@@ -182,3 +182,12 @@ fun provideAddingHabitsViewModelFactory(
         AddingHabitsViewmodel(repository)
     }
 }
+fun provideAllHabitsViewModelFactory(
+    application: Application
+): ViewModelProvider.Factory = viewModelFactory {
+    initializer {
+        val app = application as HabitApplication
+        val repository = app.habitsRepository
+        AllHabits(repository)
+    }
+}

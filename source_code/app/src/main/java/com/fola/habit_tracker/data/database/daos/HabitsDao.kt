@@ -33,4 +33,7 @@ interface HabitsDao {
     @Query("update habit set is_removed = 1 where habit_id =:habitId")
     suspend fun removeHabit(habitId: Long)
 
+    @Query("update habit set notify = :n where habit_id =:habitId")
+    suspend fun setNotify(n : Int , habitId: Long)
+
 }

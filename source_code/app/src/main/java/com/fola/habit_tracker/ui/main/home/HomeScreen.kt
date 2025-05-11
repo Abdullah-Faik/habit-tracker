@@ -36,7 +36,6 @@ import com.fola.habit_tracker.ui.main.navigation_bar.HabitSubRoutes
 import com.fola.habit_tracker.ui.main.navigation_bar.Screen
 import com.fola.habit_tracker.ui.main.profileScreen.LocalProfileRepository.userProfile
 import com.fola.habit_tracker.ui.theme.AppTheme
-import java.time.LocalDate
 
 
 @OptIn(UnstableApi::class)
@@ -47,6 +46,7 @@ fun HomeScreen(
     navController: NavController = rememberNavController(),
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
 ) {
+
 
     val userProfile by userProfile.collectAsStateWithLifecycle()
     val habits = viewModel.habits.collectAsState()
@@ -111,10 +111,6 @@ fun HomeScreen(
                                 dayId = day.value.dayId,
                                 habitId = habit.id
                             ),
-                            onClickable = {
-                                Log.d("clicking", "clicked")
-                                viewModel.removeDailyHabit(LocalDate.now(), habit.id)
-                            },
                             onIncrease = {viewModel.increase(it)},
                             onDecrease = {viewModel.deCrease(it)},
                             onDone = {viewModel.markDone(it)},

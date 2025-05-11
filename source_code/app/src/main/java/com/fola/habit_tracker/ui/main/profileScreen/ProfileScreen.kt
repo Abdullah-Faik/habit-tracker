@@ -1,5 +1,6 @@
 package com.fola.habit_tracker.ui.main.profileScreen
 
+import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -78,20 +79,20 @@ fun ProfileScreen(
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    val context = LocalContext.current
 
     val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
     val isNotificationsEnabled by viewModel.isNotificationsEnabled.collectAsStateWithLifecycle()
-    val isDarkTheme by viewModel.isDarkTheme.collectAsStateWithLifecycle()
     var currentEmail by remember { mutableStateOf(viewModel.getCurrentEmail()) }
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var isDarkTheme by remember { mutableStateOf(isDarkModeEnabled(context)) }
     var showResetDialog by remember { mutableStateOf(false) }
     var showEditProfileDialog by remember { mutableStateOf(false) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
     var showConfirmEmailDialog by remember { mutableStateOf(false) }
     var pendingEmail by remember { mutableStateOf("") }
     var pendingPassword by remember { mutableStateOf("") }
-    val context = LocalContext.current
 
     // Image picker launcher
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -101,218 +102,217 @@ fun ProfileScreen(
             viewModel.onImageSelected(it, context)
         }
     }
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
 
-    AppTheme(darkTheme = isDarkTheme) {
-        Scaffold(
-            containerColor = MaterialTheme.colorScheme.background
-        ) { paddingValues ->
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Profile Card
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(
-                            1.dp,
-                            Brush.linearGradient(
-                                listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.secondary
-                                )
-                            ),
-                            RoundedCornerShape(16.dp)
+            // Profile Card
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        1.dp,
+                        Brush.linearGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.secondary
+                            )
                         ),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                        RoundedCornerShape(16.dp)
                     ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    shape = RoundedCornerShape(16.dp)
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ProfilePicture(
-                            imageUri = userProfile.profileImageUri,
-                            onEditClick = { imagePickerLauncher.launch("image/*") }
+                    ProfilePicture(
+                        imageUri = userProfile.profileImageUri,
+                        onEditClick = { imagePickerLauncher.launch("image/*") }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = userProfile.name,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column {
-                            Text(
-                                text = userProfile.name,
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = currentEmail,
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
+                        Text(
+                            text = currentEmail,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
                     }
                 }
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                Divider(
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                    thickness = 1.dp
+            Divider(
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                thickness = 1.dp
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Settings Menu
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                SettingsMenu(
+                    onItemClick = { item ->
+                        when (item) {
+                            "Dark Theme" -> saveThemePref(context, !isDarkTheme)
+                            "Notifications" -> viewModel.toggleNotifications(!isNotificationsEnabled)
+                            "Logout" -> showLogoutDialog = true
+                            "Delete Account" -> showDeleteDialog = true
+                            "Reset Data" -> showResetDialog = true
+                            "Edit Profile Details" -> showEditProfileDialog = true
+                            "Change Password" -> showChangePasswordDialog = true
+                        }
+                    },
+                    isDarkTheme = isDarkTheme,
+                    isNotificationsEnabled = isNotificationsEnabled
                 )
+            }
 
-                Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                // Settings Menu
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                ) {
-                    SettingsMenu(
-                        onItemClick = { item ->
-                            when (item) {
-                                "Dark Theme" -> viewModel.toggleTheme()
-                                "Notifications" -> viewModel.toggleNotifications(!isNotificationsEnabled)
-                                "Logout" -> showLogoutDialog = true
-                                "Delete Account" -> showDeleteDialog = true
-                                "Reset Data" -> showResetDialog = true
-                                "Edit Profile Details" -> showEditProfileDialog = true
-                                "Change Password" -> showChangePasswordDialog = true
-                            }
-                        },
-                        isDarkTheme = isDarkTheme,
-                        isNotificationsEnabled = isNotificationsEnabled
-                    )
-                }
+            // Confirmation Dialogs
+            if (showLogoutDialog) {
+                ConfirmationDialog(
+                    title = "Confirm Logout",
+                    message = "Are you sure you want to log out?",
+                    onConfirm = {
+                        viewModel.logout()
+                        showLogoutDialog = false
+                    },
+                    onDismiss = { showLogoutDialog = false }
+                )
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
+            if (showDeleteDialog) {
+                ConfirmationDialog(
+                    title = "Confirm Delete Account",
+                    message = "This action cannot be undone. Are you sure you want to delete your account?",
+                    onConfirm = {
+                        viewModel.deleteAccount()
+                        showDeleteDialog = false
+                    },
+                    onDismiss = { showDeleteDialog = false },
+                    confirmButtonColor = MaterialTheme.colorScheme.error
+                )
+            }
 
-                // Confirmation Dialogs
-                if (showLogoutDialog) {
-                    ConfirmationDialog(
-                        title = "Confirm Logout",
-                        message = "Are you sure you want to log out?",
-                        onConfirm = {
-                            viewModel.logout()
-                            showLogoutDialog = false
-                        },
-                        onDismiss = { showLogoutDialog = false }
-                    )
-                }
+            if (showResetDialog) {
+                ConfirmationDialog(
+                    title = "Confirm Reset Data",
+                    message = "This will clear all your habit data. Are you sure you want to proceed?",
+                    onConfirm = {
+                        viewModel.resetData()
+                        showResetDialog = false
+                    },
+                    onDismiss = { showResetDialog = false },
+                    confirmButtonColor = MaterialTheme.colorScheme.error
+                )
+            }
 
-                if (showDeleteDialog) {
-                    ConfirmationDialog(
-                        title = "Confirm Delete Account",
-                        message = "This action cannot be undone. Are you sure you want to delete your account?",
-                        onConfirm = {
-                            viewModel.deleteAccount()
-                            showDeleteDialog = false
-                        },
-                        onDismiss = { showDeleteDialog = false },
-                        confirmButtonColor = MaterialTheme.colorScheme.error
-                    )
-                }
-
-                if (showResetDialog) {
-                    ConfirmationDialog(
-                        title = "Confirm Reset Data",
-                        message = "This will clear all your habit data. Are you sure you want to proceed?",
-                        onConfirm = {
-                            viewModel.resetData()
-                            showResetDialog = false
-                        },
-                        onDismiss = { showResetDialog = false },
-                        confirmButtonColor = MaterialTheme.colorScheme.error
-                    )
-                }
-
-                if (showEditProfileDialog) {
-                    EditProfileDialog(
-                        currentName = userProfile.name,
-                        currentEmail = currentEmail,
-                        onConfirm = { newName, newEmail, password ->
-                            viewModel.onNameChanged(newName)
-                            if (newEmail != currentEmail) {
-                                if (password.isEmpty()) {
-                                    Toast.makeText(
-                                        context,
-                                        "Please write your current password before updating",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    return@EditProfileDialog
-                                }
-                                pendingEmail = newEmail
-                                pendingPassword = password
-                                viewModel.updateEmail(
-                                    newEmail,
-                                    password,
+            if (showEditProfileDialog) {
+                EditProfileDialog(
+                    currentName = userProfile.name,
+                    currentEmail = currentEmail,
+                    onConfirm = { newName, newEmail, password ->
+                        viewModel.onNameChanged(newName)
+                        if (newEmail != currentEmail) {
+                            if (password.isEmpty()) {
+                                Toast.makeText(
                                     context,
-                                    onSuccess = {
-                                        showConfirmEmailDialog = true
-                                    },
-                                    onError = { errorMessage ->
-                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
-                                            .show()
-                                    }
-                                )
-                            } else if (newEmail == currentEmail && newName == userProfile.name) {
-                                Toast.makeText(context, "Please Update Your Email", Toast.LENGTH_SHORT).show()
-                                showEditProfileDialog = true
-                            } else {
-                                showEditProfileDialog = false
+                                    "Please write your current password before updating",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                return@EditProfileDialog
                             }
-                        },
-                        onDismiss = { showEditProfileDialog = false }
-                    )
-                }
-
-                if (showConfirmEmailDialog) {
-                    ConfirmationDialog(
-                        title = "Confirm Email Update",
-                        message = "Have you verified the new email ($pendingEmail)?",
-                        onConfirm = {
-                            viewModel.confirmEmailUpdate(pendingEmail, pendingPassword, context)
-                            currentEmail = viewModel.getCurrentEmail()
-                            showConfirmEmailDialog = false
-                            showEditProfileDialog = false
-                            Toast.makeText(context, "Please Verify Your Email", Toast.LENGTH_SHORT).show()
-                        },
-                        onDismiss = { showConfirmEmailDialog = false },
-                        confirmButtonColor = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                if (showChangePasswordDialog) {
-                    ChangePasswordDialog(
-                        onConfirm = { oldPassword, newPassword ->
-                            viewModel.changePasswordWithVerification(
-                                context = context,
-                                oldPassword = oldPassword,
-                                newPassword = newPassword,
-                                onSuccess = { showChangePasswordDialog = false },
-                                onError = { exception ->
-                                    val errorMessage = when (exception) {
-                                        is FirebaseAuthInvalidCredentialsException -> "Incorrect old password"
-                                        else -> "Failed to change password: ${exception.message}"
-                                    }
-                                    Toast.makeText(
-                                        context,
-                                        errorMessage,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                            pendingEmail = newEmail
+                            pendingPassword = password
+                            viewModel.updateEmail(
+                                newEmail,
+                                password,
+                                context,
+                                onSuccess = {
+                                    showConfirmEmailDialog = true
+                                },
+                                onError = { errorMessage ->
+                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
+                                        .show()
                                 }
                             )
-                        },
-                        onDismiss = { showChangePasswordDialog = false }
-                    )
-                }
+                        } else if (newEmail == currentEmail && newName == userProfile.name) {
+                            Toast.makeText(context, "Please Update Your Email", Toast.LENGTH_SHORT)
+                                .show()
+                            showEditProfileDialog = true
+                        } else {
+                            showEditProfileDialog = false
+                        }
+                    },
+                    onDismiss = { showEditProfileDialog = false }
+                )
+            }
+
+            if (showConfirmEmailDialog) {
+                ConfirmationDialog(
+                    title = "Confirm Email Update",
+                    message = "Have you verified the new email ($pendingEmail)?",
+                    onConfirm = {
+                        viewModel.confirmEmailUpdate(pendingEmail, pendingPassword, context)
+                        currentEmail = viewModel.getCurrentEmail()
+                        showConfirmEmailDialog = false
+                        showEditProfileDialog = false
+                        Toast.makeText(context, "Please Verify Your Email", Toast.LENGTH_SHORT)
+                            .show()
+                    },
+                    onDismiss = { showConfirmEmailDialog = false },
+                    confirmButtonColor = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            if (showChangePasswordDialog) {
+                ChangePasswordDialog(
+                    onConfirm = { oldPassword, newPassword ->
+                        viewModel.changePasswordWithVerification(
+                            context = context,
+                            oldPassword = oldPassword,
+                            newPassword = newPassword,
+                            onSuccess = { showChangePasswordDialog = false },
+                            onError = { exception ->
+                                val errorMessage = when (exception) {
+                                    is FirebaseAuthInvalidCredentialsException -> "Incorrect old password"
+                                    else -> "Failed to change password: ${exception.message}"
+                                }
+                                Toast.makeText(
+                                    context,
+                                    errorMessage,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        )
+                    },
+                    onDismiss = { showChangePasswordDialog = false }
+                )
             }
         }
     }
@@ -477,9 +477,11 @@ fun SettingsMenu(
                         "Notifications" -> {
                             { onItemClick("Notifications") }
                         }
+
                         "Dark Theme" -> {
                             { onItemClick("Dark Theme") }
                         }
+
                         else -> null
                     },
                     onClick = { onItemClick(text) },
@@ -746,6 +748,19 @@ fun ProfileScreenLightPreview() {
         ProfileScreen()
     }
 }
+
+
+fun saveThemePref(context: Context, isDarkMode: Boolean) {
+    val prefs = context.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE)
+    prefs.edit().putBoolean("dark_mode", isDarkMode).apply()
+}
+
+fun isDarkModeEnabled(context: Context): Boolean {
+    val prefs = context.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE)
+    return prefs.getBoolean("dark_mode", false) // false = light mode by default
+}
+
+
 
 @Preview(
     showBackground = true,

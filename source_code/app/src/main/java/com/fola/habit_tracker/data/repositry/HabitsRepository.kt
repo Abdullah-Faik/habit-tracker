@@ -21,6 +21,7 @@ interface HabitsRepository {
     //get habits
     suspend fun getActiveHabitsFlow(): Flow<List<Habit>>
     fun getDailyHabits(dayId: LocalDate): Flow<DayWithHabits>
+    suspend fun getHabit(id : Long) : Habit?
 
     //add new habits
     suspend fun addNewDailyHabit(habit: Habit)
@@ -41,6 +42,7 @@ interface HabitsRepository {
     fun getDayProgress(dayId: LocalDate): Flow<Float>
     suspend fun getDay(dayId: LocalDate): Day?
     fun updateProgress(dayId: LocalDate, habitId: Long, value: Int)
+    suspend fun setNotify(habitId: Long , n : Int)
 }
 
 
@@ -118,6 +120,14 @@ class DataBaseHabitsRepository(
     override fun updateProgress(dayId: LocalDate, habitId: Long, value: Int) {
         dailyHabitsDao.setDailyHabitProgress(dayId, habitId, value)
     }
+    override suspend fun getHabit(id : Long) : Habit? {
+        return habitDao.getHabit(id)
+    }
+
+    override suspend fun setNotify(habitId: Long , n : Int) {
+        habitDao.setNotify(n , habitId)
+    }
+
 
 
 }

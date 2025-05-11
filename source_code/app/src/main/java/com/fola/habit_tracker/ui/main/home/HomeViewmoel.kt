@@ -1,5 +1,6 @@
 package com.fola.habit_tracker.ui.main.home
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,19 +64,6 @@ class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel(
                     _dayWithHabits.value = dailyHabits
                 }
             }
-        }
-    }
-
-    fun addNewHabit(habit: Habit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            habitsRepository.addNewHabit(habit)
-            habitsRepository.addNewDailyHabit(habit)
-        }
-    }
-
-    fun removeDailyHabit(dayId: LocalDate, habitId: Long) {
-        viewModelScope.launch(Dispatchers.IO) {
-            habitsRepository.deleteHabit(dayId, habitId)
         }
     }
 
