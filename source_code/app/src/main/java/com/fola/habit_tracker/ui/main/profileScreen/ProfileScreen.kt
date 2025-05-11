@@ -78,6 +78,7 @@ fun ProfileScreen(
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+
     val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
     val isNotificationsEnabled by viewModel.isNotificationsEnabled.collectAsStateWithLifecycle()
     val isDarkTheme by viewModel.isDarkTheme.collectAsStateWithLifecycle()
@@ -98,7 +99,6 @@ fun ProfileScreen(
     ) { uri ->
         uri?.let {
             viewModel.onImageSelected(it, context)
-            Toast.makeText(context, "Profile picture selected", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -255,7 +255,7 @@ fun ProfileScreen(
                                     password,
                                     context,
                                     onSuccess = {
-                                        showConfirmEmailDialog = true // Show dialog only on success
+                                        showConfirmEmailDialog = true
                                     },
                                     onError = { errorMessage ->
                                         Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
@@ -279,7 +279,7 @@ fun ProfileScreen(
                         message = "Have you verified the new email ($pendingEmail)?",
                         onConfirm = {
                             viewModel.confirmEmailUpdate(pendingEmail, pendingPassword, context)
-                            currentEmail = viewModel.getCurrentEmail() // Update displayed email
+                            currentEmail = viewModel.getCurrentEmail()
                             showConfirmEmailDialog = false
                             showEditProfileDialog = false
                             Toast.makeText(context, "Please Verify Your Email", Toast.LENGTH_SHORT).show()
@@ -317,6 +317,8 @@ fun ProfileScreen(
         }
     }
 }
+
+// Rest of the file (ProfilePicture, SettingsMenuItem, etc.) remains unchanged
 
 @Composable
 fun ProfilePicture(

@@ -37,14 +37,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import com.fola.habit_tracker.R
 import com.fola.habit_tracker.data.database.Habit
 import com.fola.habit_tracker.ui.components.icons.PlusSmall
-import com.fola.habit_tracker.ui.components.mainFont
+import com.fola.habit_tracker.ui.main.profileScreen.LocalProfileRepository
+import com.fola.habit_tracker.ui.main.profileScreen.LocalProfileRepository.userProfile
 import com.fola.habit_tracker.ui.theme.AppTheme
 import kotlinx.coroutines.flow.flow
 import java.time.LocalDate
@@ -58,8 +59,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
 ) {
 
-    
-
+    val userProfile by LocalProfileRepository.userProfile.collectAsStateWithLifecycle()
     val habits = viewModel.habits.collectAsState()
     val dailyHabit = viewModel.dailyHabits.collectAsState()
     val day = viewModel.day.collectAsState()
@@ -86,7 +86,10 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            ProfileCard()
+            ProfileCard(
+                userName = userProfile.name.takeIf { it.isNotEmpty() } ?: "Guest User",
+                profileImageUri = userProfile.profileImageUri
+            )
             DateRow(
                 modifier = Modifier
                     .padding(vertical = 4.dp),
@@ -97,7 +100,7 @@ fun HomeScreen(
             )
             ProgressCard(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-                progress = viewModel.getDayProgress(day.value.dayId),
+                progress =  viewModel.getDayProgress(day.value.dayId),
                 allTasks = habits.value.habits.size,
                 completedTask = viewModel.getCompletedHabit()
             )
@@ -106,7 +109,6 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
-                contentPadding = PaddingValues(vertical = 8.dp)
             ) {
                 items(items = habits.value.habits, key = { it.id }) { habit ->
                     Box(modifier = Modifier.padding(vertical = 4.dp)) {

@@ -27,16 +27,8 @@ open class ProfileViewModel(
     open val isDarkTheme: StateFlow<Boolean> = localRepo.isDarkTheme
 
     init {
+        Log.d(TAG, "ProfileViewModel initialized")
         loadUserProfileFromFirebase()
-        loadLocalImageUri()
-    }
-
-    private fun loadLocalImageUri() {
-        Log.d(TAG, "loadLocalImageUri")
-        viewModelScope.launch {
-            val context = getApplicationContext()
-            localRepo.loadProfileImageUri(context)
-        }
     }
 
     private fun getApplicationContext(): Context {
@@ -49,20 +41,24 @@ open class ProfileViewModel(
         }
     }
 
-    private fun loadUserProfileFromFirebase() {
+    fun loadUserProfileFromFirebase() {
         Log.d(TAG, "loadUserProfileFromFirebase")
         viewModelScope.launch {
             remoteRepo.loadUserProfile(
                 onSuccess = { remoteProfile ->
-                    Log.i(TAG, "loadUserProfileFromFirebase: success")
+                    Log.i(TAG, "loadUserProfileFromFirebase: success, remoteProfileImageUri=${remoteProfile.profileImageUri}")
                     localRepo.updateName(remoteProfile.name)
                     localRepo.updateEmail(remoteProfile.email)
                     localRepo.updatePassword(remoteProfile.Password)
-                    localRepo.updateProfileImage(remoteProfile.profileImageUri)
+                    // Only update profileImageUri if remote value is non-empty
+                    if (remoteProfile.profileImageUri.isNotEmpty()) {
+                        localRepo.updateProfileImage(remoteProfile.profileImageUri)
+                    }
                     localRepo.toggleNotifications(remoteProfile.notificationsEnabled)
                     if (remoteProfile.darkTheme != isDarkTheme.value) {
                         localRepo.toggleTheme()
                     }
+                    Log.i(TAG, "loadUserProfileFromFirebase: localProfileImageUri=${localRepo.getCurrentProfile().profileImageUri}")
                 },
                 onError = { e ->
                     Log.e(TAG, "loadUserProfileFromFirebase: error=${e.message}")
@@ -95,20 +91,17 @@ open class ProfileViewModel(
                     return@launch
                 }
 
-                // Check if current email is verified
                 if (!user.isEmailVerified) {
                     Log.e(TAG, "updateEmail: Current email not verified")
                     onError("Please verify your current email before updating it.")
                     return@launch
                 }
 
-                // Re-authenticate the user with their current email and password
                 val currentEmail = user.email ?: throw IllegalStateException("User email is null")
                 val credential = EmailAuthProvider.getCredential(currentEmail, currentPassword)
                 user.reauthenticate(credential).await()
                 Log.i(TAG, "updateEmail: Re-authentication successful")
 
-                // Send verification email to the new email address
                 val actionCodeSettings = ActionCodeSettings.newBuilder()
                     .setUrl("https://habit-tracker-7-3-2025.web.app/__/auth/action")
                     .setHandleCodeInApp(true)
@@ -123,7 +116,7 @@ open class ProfileViewModel(
                             "A verification email has been sent to $newEmail. Please verify it before updating.",
                             Toast.LENGTH_LONG
                         ).show()
-                        onSuccess() // Notify UI to show confirmation dialog
+                        onSuccess()
                     }
                     .addOnFailureListener { e ->
                         Log.e(
@@ -158,24 +151,19 @@ open class ProfileViewModel(
                     return@launch
                 }
 
-                // Re-authenticate the user again before updating the email
                 val currentEmail = user.email ?: throw IllegalStateException("User email is null")
                 val credential = EmailAuthProvider.getCredential(currentEmail, currentPassword)
                 user.reauthenticate(credential).await()
                 Log.i(TAG, "confirmEmailUpdate: Re-authentication successful")
 
-                // Refresh user to get latest email verification status
                 user.reload().await()
 
-                // Update email in Firebase Authentication (suppress deprecation warning)
                 @Suppress("DEPRECATION")
                 user.updateEmail(newEmail).await()
                 Log.i(TAG, "confirmEmailUpdate: Email updated successfully in Firebase Auth")
 
-                // Update local profile
                 localRepo.updateEmail(newEmail)
 
-                // Sync to Firestore
                 val profile = localRepo.getCurrentProfile()
                 remoteRepo.saveUserProfile(
                     profile,
@@ -196,7 +184,6 @@ open class ProfileViewModel(
                     }
                 )
 
-                // Send verification email for the new email (Firebase may mark it as unverified)
                 user.sendEmailVerification().addOnSuccessListener {
                     Log.i(TAG, "confirmEmailUpdate: Verification email sent to $newEmail")
                     Toast.makeText(
@@ -251,9 +238,15 @@ open class ProfileViewModel(
     fun onImageSelected(uri: Uri, context: Context) {
         Log.d(TAG, "onImageSelected: uri=$uri")
         viewModelScope.launch {
-            // Save URI locally using SharedPreferences
-            localRepo.saveProfileImageUri(context, uri.toString())
-            Toast.makeText(context, "Profile picture selected", Toast.LENGTH_SHORT).show()
+            val uriString = uri.toString()
+            if (uriString.isNotEmpty()) {
+                localRepo.saveProfileImageUri(context, uriString)
+                syncProfileToFirebase()
+                Toast.makeText(context, "Profile picture updated", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.w(TAG, "onImageSelected: Invalid or empty URI")
+                Toast.makeText(context, "Failed to update profile picture: Invalid image", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -281,9 +274,7 @@ open class ProfileViewModel(
             try {
                 val user = FirebaseAuth.getInstance().currentUser
                 val email = user?.email ?: throw IllegalStateException("User not logged in")
-                // Verify old password
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(email, oldPassword).await()
-                // Update password
                 remoteRepo.changePassword(
                     newPassword,
                     onSuccess = {
@@ -323,10 +314,8 @@ open class ProfileViewModel(
         viewModelScope.launch {
             try {
                 val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
-                // Delete Firestore data
                 FirebaseFirestore.getInstance().collection("users").document(userId).delete()
                     .await()
-                // Delete Firebase Auth account
                 remoteRepo.deleteAccount(
                     onSuccess = { Log.i(TAG, "deleteAccount: success") },
                     onError = { e -> Log.e(TAG, "deleteAccount: error=${e.message}") }

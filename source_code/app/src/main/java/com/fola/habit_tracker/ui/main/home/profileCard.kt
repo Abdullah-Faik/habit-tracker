@@ -28,7 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.media3.common.util.Log
+import coil.compose.rememberAsyncImagePainter
 import com.fola.habit_tracker.R
 import com.fola.habit_tracker.ui.components.mainFont
 import com.fola.habit_tracker.ui.theme.AppTheme
@@ -36,14 +36,14 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun ProfileCard(modifier: Modifier = Modifier) {
-
+fun ProfileCard(
+    modifier: Modifier = Modifier,
+    userName: String,
+    profileImageUri: String
+) {
     Row(
-        modifier = Modifier
-            .padding(
-                horizontal = 8.dp,
-                vertical = 24.dp
-            )
+        modifier = modifier
+            .padding(horizontal = 8.dp, vertical = 24.dp)
             .clip(RoundedCornerShape(16))
             .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16))
             .background(MaterialTheme.colorScheme.secondaryContainer)
@@ -51,7 +51,6 @@ fun ProfileCard(modifier: Modifier = Modifier) {
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
-
     ) {
         var showCalendar by remember { mutableStateOf(false) }
         if (showCalendar) {
@@ -60,23 +59,30 @@ fun ProfileCard(modifier: Modifier = Modifier) {
                 onDismiss = { showCalendar = false },
             )
         }
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            val painter = rememberAsyncImagePainter(
+                model = profileImageUri.takeIf { it.isNotEmpty() } ?: R.drawable.def,
+                error = painterResource(R.drawable.def),
+                placeholder = painterResource(R.drawable.def)
+            )
+
             Image(
-                painter = painterResource(R.drawable.avatar),
+                painter = painter,
                 contentDescription = "avatar",
-                Modifier
+                modifier = Modifier
                     .border(4.dp, Color.White, RoundedCornerShape(50))
                     .clip(RoundedCornerShape(50))
                     .size(98.dp),
                 contentScale = ContentScale.Crop,
+            )
 
-                )
             Column {
                 Text(
-                    text = "HI, Name \uD83D\uDC4B\uD83C\uDFFB",
+                    text = "HI, $userName \uD83D\uDC4B\uD83C\uDFFB",
                     fontWeight = FontWeight.Bold,
                     fontFamily = mainFont,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -87,10 +93,9 @@ fun ProfileCard(modifier: Modifier = Modifier) {
                 ))
             }
         }
+
         IconButton(
-            onClick = {
-                showCalendar = !showCalendar
-            },
+            onClick = { showCalendar = !showCalendar },
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
                 .background(Color.White)
@@ -105,12 +110,11 @@ fun ProfileCard(modifier: Modifier = Modifier) {
     }
 }
 
-
 @Preview
 @Composable
 private fun PreviewCard() {
     AppTheme {
-        ProfileCard()
+        // ProfileCard()
 
     }
 }
