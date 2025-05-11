@@ -45,15 +45,19 @@ class HomeViewModel(private val habitsRepository: HabitsRepository) : ViewModel(
 
     init {
         viewModelScope.launch {
-            _day.collect { selectedDay ->
-                getDayHabit(selectedDay.dayId)
-            }
+            if (habitsRepository.getDay(LocalDate.now()) == null)
+                habitsRepository.initNewDay(LocalDate.now())
+                _day.collect { selectedDay ->
+                    getDayHabit(selectedDay.dayId)
+                }
         }
     }
 
     fun getDayHabit(dayId: LocalDate = LocalDate.now()) {
         viewModelScope.launch(Dispatchers.IO) {
-            habitsRepository.initNewDay(LocalDate.now())
+
+
+
             habitsRepository.getDailyHabits(dayId).collect { dailyHabits ->
                 withContext(Dispatchers.Main) {
                     _dayWithHabits.value = dailyHabits

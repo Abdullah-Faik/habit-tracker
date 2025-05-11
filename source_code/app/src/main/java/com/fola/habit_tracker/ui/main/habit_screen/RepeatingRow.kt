@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import com.fola.habit_tracker.data.database.Habit
 import com.fola.habit_tracker.data.database.RepeatedType
 import com.fola.habit_tracker.ui.theme.AppTheme
+import kotlinx.datetime.DayOfWeek
+import java.time.LocalDate
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -113,8 +115,7 @@ fun RepeatRow(
                     }
                 )
             }
-
-            //RepeatedType.MONTHLY -> {}
+            RepeatedType.MONTHLY -> {}
             RepeatedType.YEARLY -> {
                 DateEditing(
                     modifier = Modifier.weight(0.6f),
@@ -135,7 +136,6 @@ fun WeekDaysPicker(
     activeDays: MutableSet<Int>,
     onDayChange: (Int) -> Unit
 ) {
-    val days = listOf("S", "M", "T", "W", "T", "F", "S") // Sun to Sat
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -144,33 +144,28 @@ fun WeekDaysPicker(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        days.forEachIndexed { index, day ->
+        java.time.DayOfWeek.entries.forEach { day ->
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
                     .clickable {
-                        onDayChange(index)
-                        Log.d("inside 2 ", activeDays.toString())
+                        onDayChange(day.value)
                     }
                     .padding(4.dp)
                     .clip(RoundedCornerShape(8))
                     .background(
-                        if (activeDays.contains(index)) {
-                            Log.d("background", index.toString())
+                        if (activeDays.contains(day.value)) {
                             MaterialTheme.colorScheme.secondaryContainer
                         } else {
-                            Log.d("background", index.toString())
                             Color.Transparent
-
-
                         }
                     ),
                 contentAlignment = Alignment.Center,
 
                 ) {
                 Text(
-                    text = day,
+                    text = day.value.toString(),
                     modifier = Modifier
                         .padding(
                             8.dp,
@@ -178,7 +173,7 @@ fun WeekDaysPicker(
                     textAlign = TextAlign.Center,
                 )
             }
-            if (index < (days.size - 1)) {
+            if (day.value < (7)) {
                 VerticalDivider(
                     modifier = Modifier
                         .height(56.dp),

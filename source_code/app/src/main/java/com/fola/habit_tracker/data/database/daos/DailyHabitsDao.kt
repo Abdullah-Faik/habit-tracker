@@ -14,6 +14,10 @@ interface DailyHabitsDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertDailyHabit(dailyHabit: DailyHabits)
 
+
+    @Insert
+    suspend fun insertDailyHabits(dailyHabit: List<DailyHabits>)
+
     @Query("SELECT * FROM daily_habit WHERE day_id = :dayId AND habit_id = :habitId")
     suspend fun getDailyHabit(dayId: LocalDate, habitId: Long): DailyHabits?
 

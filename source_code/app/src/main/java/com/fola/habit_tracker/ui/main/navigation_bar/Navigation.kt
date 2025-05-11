@@ -117,7 +117,6 @@ fun MainApp(modifier: Modifier = Modifier, navigateToRoute: String? = null) {
                 ProfileScreen(viewModel = viewModel)
             }
         }
-
         LaunchedEffect(navigateToRoute) {
             navigateToRoute?.let { route ->
                 if (route == "timer") {

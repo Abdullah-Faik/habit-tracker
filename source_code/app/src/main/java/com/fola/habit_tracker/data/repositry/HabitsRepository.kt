@@ -9,6 +9,7 @@ import com.fola.habit_tracker.data.database.HabitDataBase
 import com.fola.habit_tracker.data.database.daos.DailyHabitsDao
 import com.fola.habit_tracker.data.database.daos.DayDao
 import com.fola.habit_tracker.data.database.daos.HabitsDao
+import com.fola.habit_tracker.data.database.isOnThisDay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -32,9 +33,9 @@ interface HabitsRepository {
     suspend fun addNewHabit(habit: Habit)
 
 
-    fun getDailyHabitProgress(dayId: LocalDate, habitId: Long) : Flow<Float>
+    fun getDailyHabitProgress(dayId: LocalDate, habitId: Long): Flow<Float>
     fun getDayProgress(dayId: LocalDate): Flow<Float>
-    suspend fun getDay(dayId: LocalDate) : Day?
+    suspend fun getDay(dayId: LocalDate): Day?
 }
 
 
@@ -78,16 +79,17 @@ class DataBaseHabitsRepository(
 
     override fun getDailyHabitProgress(dayId: LocalDate, habitId: Long): Flow<Float> {
         return flow {
-            emitAll(dailyHabitsDao.getDailyHabitProgress(dayId,habitId))
+            emitAll(dailyHabitsDao.getDailyHabitProgress(dayId, habitId))
         }
     }
 
     override suspend fun initNewDay(dayId: LocalDate) {
-        if (daysDao.getDay(dayId) != null)
-            return
-        else {
-            daysDao.insertDay(Day(dayId))
+        daysDao.insertDay(Day(dayId))
+        val allHabit = habitDao.getActiveHabits().filter { it.isOnThisDay(dayId) }
+        val dailyHabits = allHabit.map { habit ->
+            DailyHabits(dayId = dayId, id = habit.id)
         }
+        dailyHabitsDao.insertDailyHabits(dailyHabits)
     }
 
     override suspend fun deleteHabit(dayId: LocalDate, habitId: Long) {
@@ -96,7 +98,7 @@ class DataBaseHabitsRepository(
         habitDao.removeHabit(habitId)
     }
 
-    override fun getDayProgress(dayId: LocalDate) : Flow<Float> {
+    override fun getDayProgress(dayId: LocalDate): Flow<Float> {
         return daysDao.getDayProgress(dayId)
     }
 

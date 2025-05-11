@@ -190,7 +190,6 @@ fun AddingHabitScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             DateEditing(
-
                 enable = habit.value.repeatedType != RepeatedType.ONCE,
                 date = habit.value.startDate,
                 label = "Start Date (today default)",

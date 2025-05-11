@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.fola.habit_tracker.data.database.Habit
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 
 @Dao
@@ -16,8 +17,12 @@ interface HabitsDao {
     @Query("SELECT * FROM habit WHERE is_removed = 0")
     fun getActiveHabitsFlow(): Flow<List<Habit>>
 
-    @Query("SELECT * FROM habit WHERE is_removed = 0 and repeated_type != 'ONCE'")
-    suspend fun getActiveHabits(): List<Habit>
+    @Query("""SELECT * FROM habit WHERE is_removed = 0
+        and start_date <= :dayId
+        and end_date >= :dayId
+        and is_inactive = 0
+    """)
+    suspend fun getActiveHabits(dayId : LocalDate = LocalDate.now()): List<Habit>
 
     @Query("select * FROM habit Where habit.habit_id =(:id)")
     suspend fun getHabit(id: Long): Habit?

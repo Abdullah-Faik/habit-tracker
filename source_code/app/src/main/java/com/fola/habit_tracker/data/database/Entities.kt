@@ -13,7 +13,7 @@ import java.util.Date
 
 
 enum class RepeatedType {
-    ONCE, DAILY, WEEKLY, YEARLY
+    ONCE, DAILY, MONTHLY, WEEKLY, YEARLY
 }
 
 @Entity(tableName = "habit")
@@ -29,7 +29,7 @@ data class Habit(
     @ColumnInfo(name = "days") val days: MutableSet<Int> = mutableSetOf(),
     @ColumnInfo(name = "notify") val notification: Int = 1,
     @ColumnInfo(name = "start_date") val startDate: LocalDate = LocalDate.now(),
-    @ColumnInfo(name = "end_date") val endDate: LocalDate = LocalDate.of(2099,12,31),
+    @ColumnInfo(name = "end_date") val endDate: LocalDate = LocalDate.of(2099, 12, 31),
     @ColumnInfo(name = "start_time") val startTime: LocalTime = LocalTime.now(),
     @ColumnInfo(name = "times_of_unit") val timesOfUnit: Int = 0,
     @ColumnInfo(name = "unit") val unit: String = "",
@@ -61,3 +61,25 @@ data class DayWithHabits(
         associateBy = Junction(DailyHabits::class)
     ) val habits: List<Habit>
 )
+
+
+fun Habit.isOnThisDay(date: LocalDate): Boolean {
+    return when (repeatedType) {
+        RepeatedType.ONCE -> {
+            startDate == date
+        }
+
+        RepeatedType.DAILY -> true
+        RepeatedType.MONTHLY -> {
+            days.contains(date.dayOfMonth)
+        }
+
+        RepeatedType.WEEKLY -> {
+            days.contains(date.dayOfWeek.value)
+        }
+
+        RepeatedType.YEARLY -> {
+            days.contains(date.dayOfYear)
+        }
+    }
+}
