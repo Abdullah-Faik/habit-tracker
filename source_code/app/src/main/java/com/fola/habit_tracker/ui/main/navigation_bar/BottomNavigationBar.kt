@@ -33,20 +33,25 @@ import com.fola.habit_tracker.ui.theme.AppTheme
 enum class Screen(
     val route: String,
     @DrawableRes val icon: Int,
-    val title: String,
+    val title: String
 ) {
     Home("home", R.drawable.home_icon, "Home"),
-    Habit("habit", R.drawable.tasks, "Habit"),
+    Habit("habit/{startDes}", R.drawable.tasks, "Habit"),
     Timer("timer", R.drawable.timer_icon, "Timer"),
-    Profile("profile", R.drawable.profile_icon, "Profile")
+    Profile("profile", R.drawable.profile_icon, "Profile");
+
+    fun createHabitRoute(startDes: String) = "habit/$startDes"
 }
 
+object HabitSubRoutes {
+    const val MAIN = "habit_main"
+    const val ADDING_HABIT = "adding_habit"
+}
 
 private val bottomNavigationScreens = listOf(
     Screen.Home,
     Screen.Habit,
     Screen.Timer,
-
     Screen.Profile
 )
 
@@ -79,7 +84,6 @@ fun BottomNavigationBar(
         }
     }
 }
-
 @Composable
 fun BottomNavigationItemView(
     modifier: Modifier = Modifier,
@@ -87,7 +91,6 @@ fun BottomNavigationItemView(
     navController: NavController,
     screen: Screen,
 ) {
-
     Box(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center,
@@ -106,8 +109,12 @@ fun BottomNavigationItemView(
                     alpha = .30f
                 )
                 .clickable {
-                    if (navController.currentDestination?.route != screen.route) {
-                        navController.navigate(screen.route) {
+                    val route = when (screen) {
+                        Screen.Habit -> screen.createHabitRoute(HabitSubRoutes.MAIN)
+                        else -> screen.route
+                    }
+                    if (navController.currentDestination?.route != route) {
+                        navController.navigate(route) {
                             popUpTo(navController.graph.startDestinationId) {
                                 saveState = true
                             }
@@ -121,8 +128,6 @@ fun BottomNavigationItemView(
         )
     }
 }
-
-
 @Preview
 @Composable
 private fun BottomNavigationBarPrev() {

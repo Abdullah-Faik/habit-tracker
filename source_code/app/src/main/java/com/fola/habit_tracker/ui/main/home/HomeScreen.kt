@@ -41,9 +41,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.fola.habit_tracker.R
 import com.fola.habit_tracker.data.database.Habit
 import com.fola.habit_tracker.ui.components.icons.PlusSmall
+import com.fola.habit_tracker.ui.main.navigation_bar.HabitSubRoutes
+import com.fola.habit_tracker.ui.main.navigation_bar.Screen
 import com.fola.habit_tracker.ui.main.profileScreen.LocalProfileRepository
 import com.fola.habit_tracker.ui.main.profileScreen.LocalProfileRepository.userProfile
 import com.fola.habit_tracker.ui.theme.AppTheme
@@ -56,10 +60,11 @@ import java.time.LocalDate
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
+    navController: NavController = rememberNavController(),
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
 ) {
 
-    val userProfile by LocalProfileRepository.userProfile.collectAsStateWithLifecycle()
+    val userProfile by userProfile.collectAsStateWithLifecycle()
     val habits = viewModel.habits.collectAsState()
     val dailyHabit = viewModel.dailyHabits.collectAsState()
     val day = viewModel.day.collectAsState()
@@ -76,10 +81,12 @@ fun HomeScreen(
                     .background(MaterialTheme.colorScheme.primary)
                     .size(56.dp)
                     .clickable {
-                        viewModel.addNewHabit(Habit(title = "test"))
-                    },
+                        Log.d("HomeScreen", "Navigating to habit/adding_habit")
+                        navController.navigate(
+                            Screen.Habit.createHabitRoute(HabitSubRoutes.ADDING_HABIT)
+                        )
+                    }
             )
-
         },
     ) {
         Column(
@@ -100,7 +107,7 @@ fun HomeScreen(
             )
             ProgressCard(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-                progress =  viewModel.getDayProgress(day.value.dayId),
+                progress = viewModel.getDayProgress(day.value.dayId),
                 allTasks = habits.value.habits.size,
                 completedTask = viewModel.getCompletedHabit()
             )

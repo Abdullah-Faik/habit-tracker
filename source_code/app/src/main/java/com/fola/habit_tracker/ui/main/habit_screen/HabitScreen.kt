@@ -1,67 +1,58 @@
 package com.fola.habit_tracker.ui.main.habit_screen
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.fola.habit_tracker.R
+import com.fola.habit_tracker.ui.components.icons.PlusSmall
 import com.fola.habit_tracker.ui.components.interFont
+import com.fola.habit_tracker.ui.main.navigation_bar.HabitSubRoutes
+import com.fola.habit_tracker.ui.main.navigation_bar.Screen
 import com.fola.habit_tracker.ui.theme.AppTheme
 
-// Define routes for nested navigation within HabitScreen
-sealed class HabitScreenRoutes(val route: String) {
-    object Main : HabitScreenRoutes("habit_main")
-    object AddingHabit : HabitScreenRoutes("adding_habit")
-}
-
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HabitScreen(navController: NavController) {
-    val applicationContext = LocalContext.current
-    val nestedNavController = rememberNavController() // Create a nested NavController
+fun HabitScreen(
+    navController: NavController,
+) {
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
+    val resolvedStartDes = currentBackStackEntry?.arguments?.getString("startDes") ?: HabitSubRoutes.MAIN
+    val resolvedRoute = Screen.Habit.createHabitRoute(resolvedStartDes)
 
     Scaffold(
         topBar = {
@@ -78,8 +69,26 @@ fun HabitScreen(navController: NavController) {
                     )
                 },
                 navigationIcon = {}
-
             )
+        },
+        floatingActionButton = {
+            if (resolvedRoute == Screen.Habit.createHabitRoute(HabitSubRoutes.MAIN)) {
+                Icon(
+                    imageVector = PlusSmall,
+                    contentDescription = "Add habit",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50.dp))
+                        .background(MaterialTheme.colorScheme.primary)
+                        .size(56.dp)
+                        .clickable {
+                            Log.d("HabitScreen", "Navigating to habit/adding_habit")
+                            navController.navigate(
+                                Screen.Habit.createHabitRoute(HabitSubRoutes.ADDING_HABIT)
+                            )
+                        }
+                )
+            }
         }
     ) { innerPadding ->
         Box(
@@ -87,27 +96,19 @@ fun HabitScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Nested NavHost for HabitScreen
-            NavHost(
-                navController = nestedNavController,
-                startDestination = HabitScreenRoutes.Main.route
-            ) {
-                composable(HabitScreenRoutes.Main.route) {
-                    HabitMainContent(
-                        onAddHabitClick = {
-                            try {
-                                nestedNavController.navigate(HabitScreenRoutes.AddingHabit.route)
-                            } catch (e: IllegalArgumentException) {
-                                Log.e(
-                                    "NestedNavigationError",
-                                    "Failed to navigate to adding_habit: ${e.message}"
-                                )
-                            }
-                        }
-                    )
+            Log.d("current", currentRoute.toString())
+            when (resolvedRoute) {
+                Screen.Habit.createHabitRoute(HabitSubRoutes.MAIN) -> {
+                    Log.d("HabitScreen", "Rendering HabitMainContent")
+                    HabitMainContent()
                 }
-                composable(HabitScreenRoutes.AddingHabit.route) {
+                Screen.Habit.createHabitRoute(HabitSubRoutes.ADDING_HABIT) -> {
+                    Log.d("HabitScreen", "Rendering AddingHabitScreen")
                     AddingHabitScreen(navController)
+                }
+                else -> {
+                    Log.d("HabitScreen", "Fallback to HabitMainContent")
+                    HabitMainContent()
                 }
             }
         }
@@ -115,14 +116,10 @@ fun HabitScreen(navController: NavController) {
 }
 
 @Composable
-fun HabitMainContent(
-    onAddHabitClick: () -> Unit
-) {
+fun HabitMainContent() {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        var selectedTab by remember { mutableStateOf(0) } // 0 = Single, 1 = Recurring
-
         Column(
             modifier = Modifier,
         ) {
@@ -165,18 +162,6 @@ fun HabitMainContent(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .alpha(0.6f)
-            )
-        }
-
-        Button(
-            modifier = Modifier
-                .padding(16.dp),
-            onClick = onAddHabitClick,
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.addfab),
-                contentDescription = "Large floating action button",
-                modifier = Modifier.size(24.dp)
             )
         }
     }

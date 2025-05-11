@@ -14,9 +14,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.fola.habit_tracker.ui.auth.AuthNavigation
 import com.fola.habit_tracker.ui.main.habit_screen.HabitScreen
 import com.fola.habit_tracker.ui.main.home.HomeScreen
@@ -68,10 +70,19 @@ fun MainApp(modifier: Modifier = Modifier, navigateToRoute: String? = null) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
-                HomeScreen()
+                HomeScreen(navController = navController)
             }
-            composable(Screen.Habit.route) {
+            composable(
+                route = Screen.Habit.route, // habit/{startDes}
+                arguments = listOf(navArgument("startDes") { type = NavType.StringType })
+            ) { backStackEntry ->
                 HabitScreen(navController)
+            }
+            composable(Screen.Timer.route) {
+                SetTimerScreen(
+                    navController = navController,
+                    viewModel = timerViewModel
+                )
             }
             composable(Screen.Timer.route) {
                 SetTimerScreen(

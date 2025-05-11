@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.fola.habit_tracker.data.database.Habit
 import com.fola.habit_tracker.data.database.RepeatedType
 import com.fola.habit_tracker.ui.components.interFont
@@ -77,7 +78,8 @@ fun AddingHabitScreen(
         viewModel.setWholeHabit(editHabit)
     }
 
-    Scaffold(modifier = Modifier.fillMaxWidth(),
+    Scaffold(
+        modifier = Modifier.fillMaxWidth(),
         bottomBar = {}) {
         Column(
             modifier = Modifier
@@ -171,7 +173,6 @@ fun AddingHabitScreen(
                     onCheckedChange = { viewModel.setNotification() }
                 )
             }
-
             CustomDivider()
 
             RepeatRow(
@@ -282,7 +283,6 @@ fun AddingHabitScreen(
                 thickness = 1.dp,
                 color = Color.Gray
             )
-            // Bottom buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -327,20 +327,6 @@ val unitsList = listOf(
 @Composable
 fun AddingTaskLightPrev() {
     AppTheme {
-        AddingHabitScreen(
-            viewModel(
-            )
-        )
+        AddingHabitScreen(rememberNavController())
     }
 }
-//
-//@Preview(showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-//@Composable
-//private fun AddingTaskDarkPrev() {
-//    AppTheme {
-//        AddingHabitScreen(
-//            viewModel(
-//            )
-//        )
-//    }
-//}
