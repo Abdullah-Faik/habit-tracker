@@ -55,11 +55,11 @@ fun WelcomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            val myFont = FontFamily(Font(R.font.pacifico_regular))
+            val  myFont = FontFamily(Font(R.font.pacifico_regular))
             Text(
                 text = "Bit Flow",
                 color = MaterialTheme.colorScheme.primary,
-                fontSize = 64.sp,
+                fontSize = 52.sp,
                 fontFamily = myFont,
                 fontWeight = FontWeight.ExtraBold
             )
